@@ -2,7 +2,7 @@
 
 set -eu
 
-OUTPUT_FILE=data/latest-events.json
+OUTPUT_FILE="data/sync-events.json"
 mkdir -p data
 
 # Delete latest-events.json if it exists...
@@ -44,7 +44,7 @@ do
 
       for i in `seq 0 100000 $count`
       do 
-        psql $DATABASE_URL -c "SELECT row_to_json(r) FROM (select * FROM salesforce.$tableName WHERE systemmodstamp > '$LastAssetModStamp' ORDER BY systemmodstamp DESC LIMIT 100000 OFFSET $i) r;" | grep -e " {" | jq --compact-output '. | {event:"$set", entityType:"'$tableName'",entityId:.sfid, properties: . }' >> $OUTPUT_FILE
+        psql $DATABASE_URL -c "SELECT row_to_json(r) FROM (select * FROM salesforce.$tableName WHERE systemmodstamp > '$LastRecordModStamp' ORDER BY systemmodstamp DESC LIMIT 100000 OFFSET $i) r;" | grep -e " {" | jq --compact-output '. | {event:"$set", entityType:"'$tableName'",entityId:.sfid, properties: . }' >> $OUTPUT_FILE
       done
 
       echo "[SYNC EVENTS] -- $tableName -- Done."
