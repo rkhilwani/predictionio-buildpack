@@ -1,0 +1,63 @@
+#!/bin/bash
+## Create Initial Events Script
+
+set -eu
+
+OUTPUT_FILE=data/initial-events.json
+mkdir -p data
+
+if [ -e $OUTPUT_FILE ] 
+then
+  rm $OUTPUT_FILE
+fi  
+
+## Get all table names in the salesforce schema
+echo "[CREATE INITIAL EVENTS] Getting all table names from the salesforce schema..."
+
+tableNames=$(psql $DATABASE_URL -c "SELECT row_to_json(r) FROM (SELECT * FROM information_schema.tables WHERE table_schema = 'salesforce') r;" | grep -e " {" | jq '.table_name' | tr -d '"' | tr '\r\n' ' ') 
+
+## Put table names into an array
+read -ra arr <<< "$tableNames"
+
+## Print all table names.
+printf '[CREATE INITIAL EVENTS] %s\n' "${arr[@]}"
+
+## Create Events for all records in each table
+for tableName in "${arr[@]}"
+do
+  ## Skip tables that start with an underscore
+  if [ ! "${tableName:0:1}" == "_" ];
+  then
+    # print out the number of records for each object
+    count=$(psql $DATABASE_URL -c "SELECT row_to_json(r) FROM (SELECT COUNT(id) FROM salesforce.$tableName) r;" | grep -e " {" | jq '.count')
+    echo "[CREATE INITIAL EVENTS] -- $tableName -- Fetching $count records and writing them to $OUTPUT_FILE."
+
+    for i in `seq 0 10 10`
+    do 
+      psql $DATABASE_URL -c "SELECT row_to_json(r) FROM (select * FROM salesforce.$tableName ORDER BY systemmodstamp DESC LIMIT 10 OFFSET $i) r;" | grep -e " {"  | jq --compact-output '. | {event:"$set", entityType:"'$tableName'",entityId:.sfid, properties: . }' >> $OUTPUT_FILE
+    done
+
+    echo "[CREATE INITIAL EVENTS] -- $tableName -- Done."
+
+    echo "[CREATE INITIAL EVENTS] -- $tableName -- Appending latest timestamp event to output file..."
+    
+    latestRecordTimeStamp=`grep -m 1 '\"entityType\":\"'$tableName'\"' $OUTPUT_FILE | jq '.properties.systemmodstamp'`
+
+    echo "[CREATE INITIAL EVENTS] -- $tableName -- latestRecordTimeStamp : $latestRecordTimeStamp"
+
+    latestTimeStampEvent='{"event": "$set","entityType": "'$tableName'-last-sync","entityId": "'$tableName'-system-modstamp", "properties": {"systemModstamp":'$latestRecordTimeStamp'}}'  
+
+    echo $latestTimeStampEvent >> $OUTPUT_FILE
+
+    echo "[CREATE INITIAL EVENTS] -- $tableName -- Done."
+  else
+    echo "[CREATE INITIAL EVENTS] -- $tableName -- <<< Skipping Heroku Connect metadata / log table"
+  fi
+done
+
+echo "[CREATE INITIAL EVENTS] Finished writing to $OUTPUT_FILE, Ready for pio import."
+
+
+
+
+
