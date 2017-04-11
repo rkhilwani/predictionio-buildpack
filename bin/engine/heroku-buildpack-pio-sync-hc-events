@@ -1,0 +1,94 @@
+#!/bin/bash
+
+set -eu
+
+OUTPUT_FILE=data/latest-events.json
+mkdir -p data
+
+# Delete latest-events.json if it exists...
+if [ -e $OUTPUT_FILE ] 
+then
+  rm $OUTPUT_FILE
+fi  
+
+## Get all table names in the salesforce schema
+echo "[SYNC EVENTS] Getting all table names from the salesforce schema..."
+
+tableNames=$(psql $DATABASE_URL -c "SELECT row_to_json(r) FROM (SELECT * FROM information_schema.tables WHERE table_schema = 'salesforce') r;" | grep -e " {" | jq '.table_name' | tr -d '"' | tr '\r\n' ' ') 
+
+## Put table names into an array
+read -ra arr <<< "$tableNames"
+
+## Print all table names.
+printf '[SYNC EVENTS] %s\n' "${arr[@]}"
+
+## Create Events for all records in each table
+for tableName in "${arr[@]}"
+do
+  ## Skip tables that start with an underscore (heroku connect metadata tables)
+  if [ ! "${tableName:0:1}" == "_" ];
+  then
+
+    echo "[SYNC EVENTS] -- $tableName -- Fetching latest $tableName modstamp from eventserver..."
+
+    ## Get last Record Modstamp
+    LastRecordModStamp=$(curl -X GET "http://$PIO_EVENTSERVER_HOSTNAME/events.json?entityType=account-last-sync&accessKey=$PIO_EVENTSERVER_ACCESS_KEY&reversed=true&entityId=account-system-modstamp&limit=1" | jq '.[0] | .properties.systemModstamp' | tr -d '"') 
+
+    echo "[SYNC EVENTS] -- $tableName -- Done: $LastRecordModStamp."
+    
+    count=$(psql $DATABASE_URL -c "SELECT row_to_json(r) FROM (SELECT COUNT(id) FROM salesforce.$tableName WHERE systemmodstamp > '$LastRecordModStamp') r;" | grep -e " {" | jq '.count')
+
+    if [ !  $count == "0" ];
+    then
+      echo "[SYNC EVENTS] -- $tableName -- Fetching $count records and writing them to $OUTPUT_FILE."
+
+      for i in `seq 0 100000 $count`
+      do 
+        psql $DATABASE_URL -c "SELECT row_to_json(r) FROM (select * FROM salesforce.$tableName WHERE systemmodstamp > '$LastAssetModStamp' ORDER BY systemmodstamp DESC LIMIT 100000 OFFSET $i) r;" | grep -e " {" | jq --compact-output '. | {event:"$set", entityType:"'$tableName'",entityId:.sfid, properties: . }' >> $OUTPUT_FILE
+      done
+
+      echo "[SYNC EVENTS] -- $tableName -- Done."
+
+      echo "[SYNC EVENTS] -- $tableName -- Appending latest timestamp event to output file..."
+      
+      latestRecordTimeStamp=`grep -m 1 '\"entityType\":\"'$tableName'\"' $OUTPUT_FILE | jq '.properties.systemmodstamp'`
+
+      echo "[SYNC EVENTS] -- $tableName -- latestRecordTimeStamp : $latestRecordTimeStamp"
+
+      latestTimeStampEvent='{"event": "$set","entityType": "'$tableName'-last-sync","entityId": "'$tableName'-system-modstamp", "properties": {"systemModstamp":'$latestRecordTimeStamp'}}'  
+
+      echo $latestTimeStampEvent >> $OUTPUT_FILE
+
+      echo "[SYNC EVENTS] -- $tableName -- Done."
+    else
+      echo "[SYNC EVENTS] -- $tableName -- No Events to import. Eveything is up to date. "
+    fi
+  else
+    echo "[SYNC EVENTS] -- $tableName -- <<< Skipping Heroku Connect metadata / log table"
+  fi
+done
+
+echo "[SYNC EVENTS] Finished writing new events to $OUTPUT_FILE."
+
+## write new events to eventserver, if there are new events
+if grep -q "{" "$OUTPUT_FILE"; 
+then
+
+  echo "[SYNC EVENTS] Importing new events to eventserver..."
+
+  pio app show $PIO_EVENTSERVER_APP_NAME | tee app-show-out.log
+
+  EVENTSERVER_APP_ID=`cat app-show-out.log | ruby -E utf-8:utf-8 -e 'STDOUT << /id:\s+(\w+)/i.match(STDIN.read)[1]'`
+
+  # Enable S3 HDFS support for newer regions.
+  if [ -n "${AWS_REGION:-}" ]
+  then
+    S3_SUPPORT_OPTS="--conf 'spark.executor.extraJavaOptions=-Dcom.amazonaws.services.s3.enableV4' --conf 'spark.driver.extraJavaOptions=-Dcom.amazonaws.services.s3.enableV4'"
+  fi
+
+  eval "pio import --appid $EVENTSERVER_APP_ID --input $OUTPUT_FILE -- ${S3_SUPPORT_OPTS:-}"
+
+  echo "[SYNC EVENTS] Done."
+else
+  echo "[SYNC EVENTS] No events to import."
+fi
