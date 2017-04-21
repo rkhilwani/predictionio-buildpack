@@ -11,7 +11,9 @@ Supports engines created for **PredictionIO 0.10.0-incubating**.
 * [Classification demo](https://github.com/heroku/predictionio-engine-classification) presented at [Dreamforce 2016 "Exploring Machine Learning On Heroku"](https://www.salesforce.com/video/297129/)
 * [Template Gallery](https://predictionio.incubator.apache.org/gallery/template-gallery/) offers starting-points for many use-cases.
 
-🐸 **[How to deploy a template or custom engine](CUSTOM.md#engine)**
+🐸 [How to deploy a template or custom engine](CUSTOM.md)
+
+🚢 [Upcoming PredictionIO 0.11 pull requests](https://github.com/heroku/predictionio-buildpack/pulls?utf8=✓&q=is%3Apr%200.11.0)
 
 ## Architecture
 
