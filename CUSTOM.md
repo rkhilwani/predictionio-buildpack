@@ -39,6 +39,7 @@ Please, follow the steps in the order documented.
 * [Configuration](#configuration)
   * [Environment variables](#environment-variables)
 * [Running commands](#running-commands)
+* [Local development](#local-dev)
 
 
 ## Eventserver
@@ -375,5 +376,17 @@ Check engine status:
 
 ```bash
 heroku run pio status
+```
+
+## Local dev
+
+[Compile PredictionIO](http://predictionio.incubator.apache.org/install/install-sourcecode/) to locally match the language & dependency versions deployed with the buildpack:
+
+```bash
+./make-distribution.sh \
+  -Dscala.version=2.11.8 \
+  -Dspark.version=2.1.0 \
+  -Dhadoop.version=2.7.3 \
+  -Delasticsearch.version=5.1.1
 ```
 
