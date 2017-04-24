@@ -18,17 +18,20 @@ Please, follow the steps in the order documented.
   1. [Deploy the eventserver](#deploy-the-eventserver)
 * [Engine](#engine)
   1. [Create an engine](#create-an-engine)
-    * [Optional Persistent Filesystem](#optional-persistent-filesystem)
+     * [Optional Persistent Filesystem](#optional-persistent-filesystem)
   1. [Create a Heroku app for the engine](#create-a-heroku-app-for-the-engine)
   1. [Configure the Heroku app to use the eventserver](#configure-the-heroku-app-to-use-the-eventserver)
-  1. [Update `engine.json`](#update-engine-json)
+  1. [Update source configs](#update-source-configs)
+     1. [`template.json`](#update-template-json)
+     1. [`build.sbt`](#update-build-sbt)
+     1. [`engine.json`](#update-engine-json)
   1. [Import data](#import-data)
   1. [Deploy to Heroku](#deploy-to-heroku)
+     * [Scale-up](#scale-up)
+     * [Retry release](#retry-release)
 * [Training](#training)
   * [Automatic training](#automatic-training)
   * [Manual training](#manual-training)
-* [Scale-up](#scale-up)
-* [Retry release](#retry-release)
 * [Evaluation](#evaluation)
   1. [Changes required for evaluation](#changes-required-for-evaluation)
   1. [Perform evaluation](#perform-evaluation)
@@ -73,7 +76,7 @@ heroku pg:wait && git push heroku master
 
 Select an engine from the [gallery](https://predictionio.incubator.apache.org/gallery/template-gallery/). Download a `.tar.gz` from Github and open/expand it on your local computer.
 
-🏷 This buildpack should be used with engine templates for **PredictionIO 0.10**.
+🏷 This buildpack should be used with engine templates for **PredictionIO 0.11**.
 
 ### Create an engine
 
@@ -127,29 +130,54 @@ heroku config:set PIO_EVENTSERVER_APP_NAME=$PIO_APP_NAME
 
 * See [environment variables](#environment-variables) for config details.
 
-### Update `engine.json`
+### Update source configs
 
-⚠️ **Not required for engines that exclusively use a custom data source.**
+#### `template.json`
 
-⭐️  *A better alternative is to delete the `"appName"` param from `engine.json`, and then use the environment variable value `sys.env("PIO_EVENTSERVER_APP_NAME")` throughout the engine source code.*
+The version of PredictionIO used for deployment is based in the value in this file:
 
-Modify `engine.json` to make sure the `appName` parameter matches the [value set for `PIO_EVENTSERVER_APP_NAME`](#configure-the-heroku-app-to-use-the-eventserver).
+```json
+  "pio": {
+    "version" : {
+      "min": "0.11.0-incubating"
+    }
+  }
+```
+
+#### `build.sbt`
+
+The Scala built tool config must be updated with Scala, PredictionIO, & Spark versions:
+
+```scala
+scalaVersion := "2.11.8"
+
+organization := "org.apache.predictionio"
+
+libraryDependencies ++= Seq(
+  "org.apache.predictionio" %% "apache-predictionio-core" % "0.11.0-incubating" % "provided",
+  "org.apache.spark"        %% "spark-core"               % "2.1.0" % "provided",
+  "org.apache.spark"        %% "spark-mllib"              % "2.1.0" % "provided")
+```
+
+#### `engine.json`
+
+Update so the `appName` parameter matches the [value set for `PIO_EVENTSERVER_APP_NAME`](#configure-the-heroku-app-to-use-the-eventserver).
 
 ```json
   "datasource": {
     "params" : {
-      "appName": "$PIO_APP_NAME"
+      "appName": "$PIO_EVENTSERVER_APP_NAME"
     }
   }
 ```
+
+⭐️  **A better alternative** is to delete the `"appName"` param from `engine.json`, and then use the environment variable value `sys.env("PIO_EVENTSERVER_APP_NAME")` in the engine source code.
 
 ### Import data
 
 🚨 **Mandatory: Data is required.** The first time an engine is deployed, it requires data for training.
 
-For example engines containing `data/initial-events.json`, this data will automatically be imported into the eventserver before training.
-
-⚠️  *If `data/initial-events.json` already exists in the engine, then skip to [Deploy to Heroku](#deploy-to-heroku).*
+⚠️  If `data/initial-events.json` already exists in the engine, then skip to [Deploy to Heroku](#deploy-to-heroku). This data will automatically be imported into the eventserver before training.
 
 For production engines, use one of the following:
 
@@ -180,6 +208,21 @@ heroku logs -t --app $ENGINE_NAME
 
 ⚠️ **Initial deploy will probably fail due to memory constraints.** To fix, [scale up](#scale-up) and [retry the release](#retry-release).
 
+#### Scale up
+
+Once deployed, scale up the processes and config Spark to avoid memory issues. These are paid, [professional dyno types](https://devcenter.heroku.com/articles/dyno-types#available-dyno-types):
+
+```bash
+heroku ps:scale \
+  web=1:Performance-M \
+  release=0:Performance-L \
+  train=0:Performance-L
+```
+
+#### Retry release
+
+When the release (`pio train`) fails due to memory constraints or other transient error, you may use the Heroku CLI [releases:retry plugin](https://github.com/heroku/heroku-releases-retry) to rerun the release without pushing a new deployment.
+
 
 ## Training
 
@@ -195,22 +238,6 @@ heroku run train
 # You may need to revive the app from "crashed" state.
 heroku restart
 ```
-
-## Scale up
-
-Once deployed, scale up the processes and config Spark to avoid memory issues. These are paid, [professional dyno types](https://devcenter.heroku.com/articles/dyno-types#available-dyno-types):
-
-```bash
-heroku ps:scale \
-  web=1:Performance-M \
-  release=0:Performance-L \
-  train=0:Performance-L
-```
-
-## Retry release
-
-When the release (`pio train`) fails due to memory constraints or other transient error, you may use the Heroku CLI [releases:retry plugin](https://github.com/heroku/heroku-releases-retry) to rerun the release without pushing a new deployment.
-
 
 ## Evaluation
 
@@ -271,9 +298,9 @@ Engine deployments honor the following config vars:
   * when testing locally, set `PIO_POSTGRES_OPTIONAL_SSL=true` to avoid **The server does not support SSL** errors
 * `PIO_VERBOSE`
   * set `PIO_VERBOSE=true` for detailed build logs
-* `PIO_BUILD_SPARK_VERSION`
-  * default `1.6.3`
-  * supports `1.4.1`, `1.5.1`, `1.6.1`, `1.6.2`, & `1.6.3`
+* `PIO_MAVEN_REPO`
+  * add a Maven repository URL to search when installing deps from engine's `build.sbt`
+  * useful for testing pre-release packages
 * `PREDICTIONIO_DIST_URL`
   * defaults to a PredictionIO distribution version based on `pio.version.min` in **template.json**
   * use a custom distribution by setting its fetch URL:
@@ -306,6 +333,18 @@ Engine deployments honor the following config vars:
       PIO_TRAIN_SPARK_OPTS='--master spark://my-master.example.com:7077' \
       PIO_SPARK_OPTS='--master spark://my-master.example.com:7077'
     ```
+  * note this additional constraint of Spark pass-through args,  
+    `spark.driver.extraJavaOptions` is silently ignored:
+
+    ```bash
+    # Options are silently dropped when set through `--conf`.
+    # Bad example; don't use this:
+    PIO_SPARK_OPTS="--conf 'spark.driver.extraJavaOptions=-Dcom.amazonaws.services.s3.enableV4'"
+
+    # Instead, pass them using `--driver-java-options`.
+    # Good example; do this:
+    PIO_SPARK_OPTS="--driver-java-options '-Dcom.amazonaws.services.s3.enableV4'"
+    ```
 * `PIO_ENABLE_FEEDBACK`
   * set `PIO_ENABLE_FEEDBACK=true` to enable feedback loop; auto-generation of historical prediction events for analysis of engine performance
   * requires the `PIO_EVENTSERVER_*` vars to be configured
@@ -319,6 +358,8 @@ Engine deployments honor the following config vars:
   * use [manual training](#manual-training)
 * `PIO_S3_BUCKET_NAME`, `PIO_S3_AWS_ACCESS_KEY_ID`, & `PIO_S3_AWS_SECRET_ACCESS_KEY`
   * configures a bucket to enable filesystem access
+* `AWS_REGION`
+  * when connecting to S3 in region other than US, the region name must be specified to enable signature v4.
 
 ## Running commands
 

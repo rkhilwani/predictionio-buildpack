@@ -42,6 +42,21 @@ requires_apache_predictionio() {
   fi
 }
 
+# Simply returns the version string
+get_predictionio_version() {
+  local template_json=$1
+  if [ -e $template_json ]
+  then
+    cat $template_json | ruby \
+      -E utf-8:utf-8 \
+      -r json \
+      -e "STDOUT << JSON.parse(STDIN.read)['pio']['version']['min']"
+  else
+    # without a template file, assume we're build the eventserver on the newest version
+    echo '0.11.0-incubating'
+  fi
+}
+
 export_env_dir() {
   local env_dir=$1
   local whitelist_regex=${2:-''}
@@ -64,8 +79,10 @@ BP_DIR=$(cd $(dirname ${0:-}); cd ..; pwd)
 
 export_env_dir "$ENV_DIR" '^PREDICTIONIO_DIST_URL$'
 export_env_dir "$ENV_DIR" '^PIO_BUILD_SPARK_VERSION$'
-SPARK_VERSION="spark-${PIO_BUILD_SPARK_VERSION:-1.6.3}-bin-hadoop2.6"
+export_env_dir "$ENV_DIR" '^PIO_BUILD_HADOOP_VERSION$'
 POSTGRESQL_DRIVER=https://marsikai.s3.amazonaws.com/postgresql-9.4.1209.jar
+HADOOP_AWS_SUPPORT=https://marsikai.s3.amazonaws.com/hadoop-aws-2.7.3.jar
+AWS_SDK=https://marsikai.s3.amazonaws.com/aws-java-sdk-1.7.4.jar
 
 if [ "${PREDICTIONIO_DIST_URL:-}" ]
 then
@@ -73,7 +90,16 @@ then
   echo "Using PredictionIO distribution at ${PREDICTIONIO_DIST_URL}" | indent
 elif [ $(requires_apache_predictionio "$BUILD_DIR/template.json") ]
 then
-  PIO_VERSION=0.10.0-incubating
+  requires_pio_version=$(get_predictionio_version "$BUILD_DIR/template.json")
+  if [ "$requires_pio_version" = "0.10.0-incubating" ]
+    then
+    PIO_VERSION=0.10.0-incubating
+  elif [ "$requires_pio_version" = "0.11.0-incubating" ]
+    then
+    PIO_VERSION=0.11.0-incubating-rc2-proof
+    PIO_BUILD_SPARK_VERSION=2.1.0
+    PIO_BUILD_HADOOP_VERSION=2.7
+  fi
   echo "Using Apache PredictionIO ${PIO_VERSION}" | indent
 else
   mkdir -p "$BUILD_DIR/.heroku"
@@ -83,7 +109,7 @@ else
 fi
 
 PIO_BUILD=PredictionIO-${PIO_VERSION}
-
+SPARK_VERSION="spark-${PIO_BUILD_SPARK_VERSION:-1.6.3}-bin-hadoop${PIO_BUILD_HADOOP_VERSION:-2.6}"
 
 # PredictionIO dist tarball URL, expects `.tar.gz` 
 default_url="https://marsikai.s3.amazonaws.com/${PIO_BUILD}.tar.gz"
@@ -104,15 +130,33 @@ default_pio_env="config/pio-env.sh"
 custom_pio_env="$BUILD_DIR/config/pio-env.sh"
 target_pio_env="${dist_dir}/conf/pio-env.sh"
 
-echo "Fetch distribution of PredictionIO" | indent
+echo "Fetch distribution of PredictionIO (${PIO_VERSION})" | indent
 curl -s -L "$url" > "${dist_name}.tar.gz"
 mkdir -p "$dist_dir"
 tar -xz -f "${dist_name}.tar.gz" -C "$dist_dir" --strip-components=1 | indent
 
-echo "Fetch distribution of Spark" | indent
+echo "Fetch distribution of Spark (${SPARK_VERSION})" | indent
 curl -s -L "https://marsikai.s3.amazonaws.com/${SPARK_VERSION}.tar.gz" > "spark-hadoop.tar.gz"
 mkdir -p "$dist_dir/vendors/spark-hadoop"
 tar -xz -f "spark-hadoop.tar.gz" -C "$dist_dir/vendors/spark-hadoop" --strip-components=1  | indent
+
+topic 'Install supplemental drivers'
+
+echo "+ PostgreSQL (JDBC)" | indent
+pio_lib_dir=$dist_dir/lib
+mkdir -p $pio_lib_dir
+curl -s -L "$POSTGRESQL_DRIVER" > "$pio_lib_dir/postgresql_jdbc.jar"
+
+# Only required for an Engine
+if [ -f "${BUILD_DIR}/engine.json" ]
+  then
+  spark_lib_dir=$dist_dir/lib/spark
+  mkdir -p $spark_lib_dir
+  echo "+ S3 HDFS (AWS SDK)" | indent
+  curl -s -L "$AWS_SDK" > "$spark_lib_dir/aws-java-sdk.jar"
+  echo "+ S3 HDFS (Hadoop-AWS)" | indent
+  curl -s -L "$HADOOP_AWS_SUPPORT" > "$spark_lib_dir/hadoop-aws.jar"
+fi
 
 topic "Configure PredictionIO"
 if [ -f "${custom_pio_env}" ]
@@ -128,17 +172,16 @@ cp "$BP_DIR/config/core-site.xml.erb" "$dist_dir/conf/"
 echo "Set-up runtime environment" | indent
 mkdir -p "$BUILD_DIR/.profile.d"
 cp -r .profile.d/* "$BUILD_DIR/.profile.d/" | indent
-# Load the env for the following build steps
+# Load the env for build. Note:
+# * all `PIO_*` variables
+# * `DATABASE_URL` supports PIO 0.10 and earlier's engine registration,
+#   it is no longer required as of 0.11
 export_env_dir "$ENV_DIR" '^(PIO_\w+|DATABASE_URL)$'
 source .profile.d/pio-path.sh
 
 if [ -f "${BUILD_DIR}/engine.json" ]
 then
   topic "Build PredictionIO engine"
-
-  echo "Current/buildpack dir: $(pwd)" | indent
-  echo "Build dir: $BUILD_DIR" | indent
-  echo "Cache dir: $CACHE_DIR" | indent
 
   # Move to dyno-runtime-compatible prefix for `pio build`
   echo "Move to $app_prefix for 'pio build'" | indent
@@ -149,6 +192,23 @@ then
   mv $STAGE_THE_BUILD/* $app_prefix/
   rm -rf $STAGE_THE_BUILD
   cd $app_prefix
+
+  if [ "${PIO_MAVEN_REPO:-}" ]
+    then
+    echo "Enable custom Maven repo" | indent
+    (echo && \
+      echo '// Search for packages in custom repo via predictionio-buildpack' && \
+      echo "resolvers += \"Custom Repository via PIO_MAVEN_REPO\" at \"$PIO_MAVEN_REPO\"") >> build.sbt
+  fi
+
+  if [ -d "$BP_DIR/repo" ]
+    then
+    echo "Enable local Maven repo" | indent
+    cp -r $BP_DIR/repo .
+    (echo && \
+      echo '// Search for packages provided by predictionio-buildpack' && \
+      echo 'resolvers += "Local Repository" at "file://"+baseDirectory.value+"/repo"') >> build.sbt
+  fi
 
   if [ "${PIO_VERBOSE:-}" = "true" ]
   then
@@ -165,7 +225,7 @@ then
   # and removing big objects that seem unnecessary.
   rm -rf "target/streams" || true
 
-  echo "Make build artifacts available in runtime" | indent
+  echo "Making engine available in runtime at /app/pio-engine/" | indent
   # After PIO build at the runtime prefix, move the engine into the slug
   mv $app_prefix $BUILD_DIR || true
   # Move the Procfile(s) back to the top-level app directory or use default for engines
@@ -179,26 +239,22 @@ then
     cp "${BP_DIR}/Procfile-engine" "${BUILD_DIR}/Procfile"
   fi
 
-  echo "Moving engine's bin/ & conf/ into place" | indent
+  echo "Making Procfile executables available in /app/bin/" | indent
+  mkdir -p $BUILD_DIR/bin
+  cp $BP_DIR/bin/engine/heroku-* $BUILD_DIR/bin/
   # This supports composition with other buildpacks which might expect 
   # bin/ & conf/ directories to stay in app/.
-  mkdir -p $BUILD_DIR/$app_namespace/bin
-  mv $BUILD_DIR/$app_namespace/bin $BUILD_DIR/
-  mkdir -p $BUILD_DIR/$app_namespace/conf
-  mv $BUILD_DIR/$app_namespace/conf $BUILD_DIR/
-
-  echo "Set-up train on release (disable with PIO_TRAIN_ON_RELEASE=false)" | indent
-  mkdir -p "$BUILD_DIR/bin"
-  cp $BP_DIR/bin/engine/heroku-* "$BUILD_DIR/bin/"
+  if [ -d "$BUILD_DIR/$app_namespace/bin" ]
+    then
+    mv $BUILD_DIR/$app_namespace/bin/* $BUILD_DIR/bin/
+  fi
+  if [ -d "$BUILD_DIR/$app_namespace/conf" ]
+    then
+    mv $BUILD_DIR/$app_namespace/conf/* $BUILD_DIR/conf/
+  fi
 
 # The eventserver is built directly by the Scala buildpack.
 # (heroku/scala must be the last buildpack defined for the app)
 else
-  echo 'No engine to build. (`engine.json` does not exist.)' | indent
+  echo '`pio` CLI is installed. No engine to build. (`engine.json` does not exist.)' | indent
 fi
-
-topic 'Install supplemental drivers'
-
-echo "+ PostgreSQL JDBC" | indent
-mkdir -p "${BUILD_DIR}/lib"
-curl -s -L "$POSTGRESQL_DRIVER" > "${BUILD_DIR}/lib/postgresql_jdbc.jar"
