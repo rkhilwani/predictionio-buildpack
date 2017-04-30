@@ -20,8 +20,6 @@ Getting started with an engine:
 
 🐸 [How to deploy a template or custom engine](CUSTOM.md)
 
-🚢 [Upcoming PredictionIO 0.11 pull requests](https://github.com/heroku/predictionio-buildpack/pulls?utf8=✓&q=is%3Apr%200.11.0)
-
 ## Architecture
 
 This buildpack transforms the [Scala](http://www.scala-lang.org) source-code of a PredictionIO engine into a [Heroku app](https://devcenter.heroku.com/articles/how-heroku-works).
