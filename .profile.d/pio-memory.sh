@@ -16,19 +16,19 @@ function already_has_memory_opts() {
 limit=$(ulimit -u)
 case $limit in
 256)   # 512MB (Free, Hobby, Standard-1X)
-  default_spark_opts="--executor-memory 256m --driver-memory 256m"
+  default_spark_opts="--driver-memory 512m"
   ;;
 512)   # 1024MB (Standard-2X, Private-S)
-  default_spark_opts="--executor-memory 512m --driver-memory 512m"
+  default_spark_opts="--driver-memory 1024m"
   ;;
 16384) # 2560MB (Performance-M, Private-M)
-  default_spark_opts="--executor-memory 1536m --driver-memory 1024m"
+  default_spark_opts="--driver-memory 2560m"
   ;;
 32768) # 14GB (Performance-L, Private-L)
-  default_spark_opts="--executor-memory 10g --driver-memory 4g"
+  default_spark_opts="--driver-memory 14g"
   ;;
 *)
-  default_spark_opts="--executor-memory 256m --driver-memory 256m"
+  default_spark_opts="--driver-memory 512m"
   ;;
 esac
 
