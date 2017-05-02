@@ -389,6 +389,32 @@ heroku run pio status
 
 ## Local dev
 
+Use the buildpack's local development feature to use the same dependencies as when deployed to Heroku.
+
+Local Postgres (& Elasticsearch) must be running on their default local ports.
+
+```bash
+git clone https://github.com/heroku/predictionio-buildpack/blob/local-dev
+export PIO_BUILDPACK_DIR="$(pwd)/predictionio-buildpack"
+
+cd to/your/engine
+touch .env
+# …now open .env and add your specific configs. Minimal example:
+#   PIO_EVENTSERVER_APP_NAME=ur
+
+# Then, setup this environment:
+$PIO_BUILDPACK_DIR/bin/local/setup
+
+# …and initialize the environment:
+source $PIO_BUILDPACK_DIR/bin/local/env
+
+# Now, use `pio`:
+pio status
+pio build --verbose
+pio train -- --driver-memory 8G
+pio deploy
+```
+
 [Compile PredictionIO](http://predictionio.incubator.apache.org/install/install-sourcecode/) to locally match the language & dependency versions deployed with the buildpack:
 
 ```bash
