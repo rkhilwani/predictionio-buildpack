@@ -428,7 +428,9 @@ export PIO_BUILDPACK_DIR="$(pwd)"
 
 ### 3. The Engine
 
-Now, we'll install & configure PredictionIO & its dependencies into `PredictionIO-dist/`.
+With a few commands, we'll install PredictionIO & its dependencies into `./PredictionIO-dist/` and configure it all via env vars & rendered config files.
+
+Do this in each engine you wish to develop locally.
 
 ```bash
 # First, change directory to the target engine:
