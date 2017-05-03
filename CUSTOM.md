@@ -431,11 +431,8 @@ export PIO_BUILDPACK_DIR="$(pwd)"
 Now, we'll install & configure PredictionIO & its dependencies into `PredictionIO-dist/`.
 
 ```bash
-# First, change directory up to your top-level projects:
-cd ~/my/projects/
-
-git clone https://github.com/heroku/predictionio-engine-ur
-cd predictionio-engine-ur/
+# First, change directory to the target engine:
+cd engine-dir/
 
 # Install the environment template; edit it if you need to:
 cp .env.local .env
@@ -466,7 +463,7 @@ source $PIO_BUILDPACK_DIR/bin/local/env
 In a new terminal,
 
 ```bash
-cd predictionio-engine-ur/PredictionIO-dist/elasticsearch
+cd engine-dir/PredictionIO-dist/elasticsearch
 bin/elasticsearch
 ```
 
@@ -475,7 +472,7 @@ bin/elasticsearch
 In a new terminal,
 
 ```bash
-cd predictionio-engine-ur/
+cd engine-dir/
 source $PIO_BUILDPACK_DIR/bin/local/env
 pio eventserver
 ```
