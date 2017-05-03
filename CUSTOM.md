@@ -424,7 +424,7 @@ git checkout local-dev
 export PIO_BUILDPACK_DIR="$(pwd)"
 ```
 
-As time passes, you may wish to `git pull` the newest buildpack updates.
+* As time passes, you may wish to `git pull` the newest buildpack updates.
 
 ### 3. The Engine
 
@@ -438,12 +438,19 @@ cd predictionio-engine-ur/
 # Install the environment template; edit it if you need to:
 cp .env.local .env
 
+# Ignore the local dev artifacts
+echo '.env'               >> .gitignore
+echo 'PredictionIO-dist/' >> .gitignore
+echo 'repo/'              >> .gitignore
+
 # Setup this working directory:
 $PIO_BUILDPACK_DIR/bin/local/setup
 
 # …and initialize the environment:
 source $PIO_BUILDPACK_DIR/bin/local/env
 ```
+
+⚠️ Note that `setup` naively appends to `build.sbt` each time. This change should not be committed. We hope to remove this local Maven repo requirement someday.
 
 #### Refreshing the environment
 
