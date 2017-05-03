@@ -481,7 +481,7 @@ pio eventserver
 
 ```bash
 pio status
-pio app new ur
+pio app new my-engine-name
 pio build --verbose
 # Importing data is required before training will succeed
 pio train -- --driver-memory 8G
