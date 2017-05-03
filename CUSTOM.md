@@ -428,6 +428,8 @@ export PIO_BUILDPACK_DIR="$(pwd)"
 
 ### 3. The Engine
 
+Now, we'll install & configure PredictionIO & its dependencies into `PredictionIO-dist/`.
+
 ```bash
 # First, change directory up to your top-level projects:
 cd ~/my/projects/
