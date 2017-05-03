@@ -39,7 +39,7 @@ Please, follow the steps in the order documented.
 * [Configuration](#configuration)
   * [Environment variables](#environment-variables)
 * [Running commands](#running-commands)
-* [Local development](#local-dev)
+* [Local development](#local-development)
 
 
 ## Eventserver
