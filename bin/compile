@@ -9,54 +9,6 @@ set -u
 # Debug, echo every command
 #set -x
 
-function error() {
-  echo " !     $*" >&2
-  exit 1
-}
-
-function topic() {
-  echo "-----> $*"
-}
-
-function indent() {
-  c='s/^/       /'
-  case $(uname) in
-    Darwin) sed -l "$c";;
-    *)      sed -u "$c";;
-  esac
-}
-
-# If the engine requires the newer Apache distribution
-# returns 'true', and otherwise '' (empty string)
-requires_apache_predictionio() {
-  local template_json=$1
-  if [ -e $template_json ]
-  then
-    cat $template_json | ruby \
-      -E utf-8:utf-8 \
-      -r json \
-      -e "version = JSON.parse(STDIN.read)['pio']['version']['min']; major,minor = version.split('.').map(&:to_i); STDOUT << (major>=0 && minor>=10 ? 'true' : '')"
-  else
-    # without a template file, assume we're build the eventserver on the newest version
-    echo 'true'
-  fi
-}
-
-# Simply returns the version string
-get_predictionio_version() {
-  local template_json=$1
-  if [ -e $template_json ]
-  then
-    cat $template_json | ruby \
-      -E utf-8:utf-8 \
-      -r json \
-      -e "STDOUT << JSON.parse(STDIN.read)['pio']['version']['min']"
-  else
-    # without a template file, assume we're build the eventserver on the newest version
-    echo '0.11.0-incubating'
-  fi
-}
-
 export_env_dir() {
   local env_dir=$1
   local whitelist_regex=${2:-''}
@@ -76,7 +28,6 @@ CACHE_DIR=${2:-}
 ENV_DIR=${3:-}
 BP_DIR=$(cd $(dirname ${0:-}); cd ..; pwd)
 
-
 # Load the env for build. Note:
 # * all `PIO_*` variables
 # * `DATABASE_URL` supports PIO 0.10 and earlier's engine registration,
@@ -84,126 +35,7 @@ BP_DIR=$(cd $(dirname ${0:-}); cd ..; pwd)
 export_env_dir "$ENV_DIR" '^(PIO_\w+|DATABASE_URL)$'
 export_env_dir "$ENV_DIR" '^PREDICTIONIO_DIST_URL$'
 
-POSTGRESQL_DRIVER=https://marsikai.s3.amazonaws.com/postgresql-9.4.1209.jar
-HADOOP_AWS_SUPPORT=https://marsikai.s3.amazonaws.com/hadoop-aws-2.7.3.jar
-AWS_SDK=https://marsikai.s3.amazonaws.com/aws-java-sdk-1.7.4.jar
-ELASTICSEARCH_DIST_URL=https://marsikai.s3.amazonaws.com/elasticsearch-5.1.1.tar.gz
-
-if [ "${PREDICTIONIO_DIST_URL:-}" ]
-then
-  PIO_VERSION=custom-distribution
-  echo "Using PredictionIO distribution at ${PREDICTIONIO_DIST_URL}" | indent
-elif [ $(requires_apache_predictionio "$BUILD_DIR/template.json") ]
-then
-  requires_pio_version=$(get_predictionio_version "$BUILD_DIR/template.json")
-  if [[ $requires_pio_version =~ ^0\.10 ]]
-    then
-    PIO_VERSION=0.10.0-incubating
-  elif [[ $requires_pio_version =~ ^0\.11\.0-SNAPSHOT ]]
-    then
-    PIO_VERSION=0.11.0-SNAPSHOT-esclient-auth
-    PIO_BUILD_SPARK_VERSION=2.1.0
-    PIO_BUILD_HADOOP_VERSION=2.7
-  else
-    PIO_VERSION=0.11.0-incubating
-    PIO_BUILD_SPARK_VERSION=2.1.0
-    PIO_BUILD_HADOOP_VERSION=2.7
-  fi
-  echo "Using Apache PredictionIO ${PIO_VERSION}" | indent
-else
-  mkdir -p "$BUILD_DIR/.heroku"
-  echo '# Presence of this file indicates a pre-Apache engine (<= 0.9)' > "$BUILD_DIR/.heroku/.is_old_predictionio"
-  PIO_VERSION=0.9.5
-  echo "Using PredictionIO $PIO_VERSION" | indent
-fi
-
-PIO_BUILD=PredictionIO-${PIO_VERSION}
-SPARK_VERSION="spark-${PIO_BUILD_SPARK_VERSION:-1.6.3}-bin-hadoop${PIO_BUILD_HADOOP_VERSION:-2.6}"
-
-# PredictionIO dist tarball URL, expects `.tar.gz` 
-default_url="https://marsikai.s3.amazonaws.com/${PIO_BUILD}.tar.gz"
-url="${PREDICTIONIO_DIST_URL-$default_url}"
-
-# The PATH set in .profile.d/pio-env.sh must match.
-dist_name="PredictionIO-dist"
-dist_dir="$BUILD_DIR/$dist_name"
-
-# Build with dyno runtime-compatible prefix.
-# The PATH set in .profile.d/pio-env.sh must match.
-# (`pio build` ends up capturing its absolute build path, so it needs
-# to align with the actual runtime.)
-app_namespace="pio-engine"
-app_prefix="/app/${app_namespace}"
-
-topic 'Install core components'
-
-echo "+ PredictionIO (${PIO_VERSION})" | indent
-curl -s -L "$url" > "${dist_name}.tar.gz"
-mkdir -p "$dist_dir"
-tar -xz -f "${dist_name}.tar.gz" -C "$dist_dir" --strip-components=1 | indent
-
-echo "+ Spark (${SPARK_VERSION})" | indent
-SPARK_HOME_DIR="$dist_dir/vendors/spark-hadoop"
-curl -s -L "https://marsikai.s3.amazonaws.com/${SPARK_VERSION}.tar.gz" > "spark-hadoop.tar.gz"
-mkdir -p "$SPARK_HOME_DIR"
-tar -xz -f "spark-hadoop.tar.gz" -C "$SPARK_HOME_DIR" --strip-components=1  | indent
-
-topic 'Install supplemental components'
-
-echo "+ PostgreSQL (JDBC)" | indent
-pio_lib_dir=$dist_dir/lib
-mkdir -p $pio_lib_dir
-curl -s -L "$POSTGRESQL_DRIVER" > "$pio_lib_dir/postgresql_jdbc.jar"
-
-if [ "${PIO_S3_BUCKET_NAME:-}" ]
-  then
-  spark_lib_dir=$dist_dir/lib/spark
-  mkdir -p $spark_lib_dir
-  echo "+ S3 HDFS (AWS SDK)" | indent
-  curl -s -L "$AWS_SDK" > "$spark_lib_dir/aws-java-sdk.jar"
-  echo "+ S3 HDFS (Hadoop-AWS)" | indent
-  curl -s -L "$HADOOP_AWS_SUPPORT" > "$spark_lib_dir/hadoop-aws.jar"
-  # Overrideable config file
-  default_hadoop="config/core-site.xml.erb"
-  custom_hadoop="$BUILD_DIR/config/core-site.xml.erb"
-  target_hadoop="${dist_dir}/conf/core-site.xml.erb"
-  if [ -f "${custom_hadoop}" ]
-    then
-    echo "  Using custom 'config/core-site.xml.erb'" | indent
-    cp "${custom_hadoop}" "${target_hadoop}" | indent
-  else
-    echo "  Writing default 'core-site.xml.erb'" | indent
-    cp "${default_hadoop}" "${target_hadoop}" | indent
-  fi
-fi
-
-if [ "${PIO_ELASTICSEARCH_URL:-}" ]
-  then
-  echo "+ Elasticsearch" | indent
-  curl -s -L "$ELASTICSEARCH_DIST_URL" > "elasticsearch.tar.gz"
-  mkdir -p "$dist_dir/vendors/elasticsearch"
-  tar -xz -f "elasticsearch.tar.gz" -C "$dist_dir/vendors/elasticsearch" --strip-components=1  | indent
-  # Overrideable config file
-  default_elasticsearch="config/elasticsearch.yml.erb"
-  custom_elasticsearch="$BUILD_DIR/config/elasticsearch.yml.erb"
-  target_elasticsearch="${dist_dir}/conf/elasticsearch.yml.erb"
-  if [ -f "${custom_elasticsearch}" ]
-    then
-    echo "  Using custom 'config/elasticsearch.yml.erb'" | indent
-    cp "${custom_elasticsearch}" "${target_elasticsearch}" | indent
-  else
-    echo "  Writing default 'elasticsearch.yml.erb'" | indent
-    cp "${default_elasticsearch}" "${target_elasticsearch}" | indent
-  fi
-fi
-
-if [ "${PIO_MAVEN_REPO:-}" ]
-  then
-  echo "+ Maven repo $PIO_MAVEN_REPO" | indent
-  (echo && \
-    echo '// Search for packages in custom repo via predictionio-buildpack' && \
-    echo "resolvers += \"Custom Repository via PIO_MAVEN_REPO\" at \"$PIO_MAVEN_REPO\"") >> $BUILD_DIR/build.sbt
-fi
+source ./bin/common/setup-runtime "$BUILD_DIR" "$BP_DIR"
 
 if [ -d "$BP_DIR/repo" ]
   then
@@ -214,42 +46,21 @@ if [ -d "$BP_DIR/repo" ]
     echo 'resolvers += "Local Repository" at "file://"+baseDirectory.value+"/repo"') >> $BUILD_DIR/build.sbt
 fi
 
-topic "Configure PredictionIO"
-default_pio_env="config/pio-env.sh"
-custom_pio_env="$BUILD_DIR/config/pio-env.sh"
-target_pio_env="${dist_dir}/conf/pio-env.sh"
-# Overrideable config file
-if [ -f "${custom_pio_env}" ]
-then
-  echo "Using custom 'config/pio-env.sh'" | indent
-  cp "${custom_pio_env}" "${target_pio_env}" | indent
-else
-  echo "Writing default 'pio-env.sh'" | indent
-  cp "${default_pio_env}" "${target_pio_env}" | indent
-fi
-
-echo "Set-up runtime environment via '.profile.d/' scripts" | indent
+echo "Set-up environment via '.profile.d/' scripts" | indent
 mkdir -p "$BUILD_DIR/.profile.d"
-cp -r .profile.d/* "$BUILD_DIR/.profile.d/" | indent
-
-default_spark="config/spark-defaults.conf.erb"
-custom_spark="$BUILD_DIR/config/spark-defaults.conf.erb"
-target_spark="$SPARK_HOME_DIR/conf/spark-defaults.conf.erb"
-if [ -f "${custom_spark}" ]
-  then
-  echo "Using custom 'config/spark-defaults.conf.erb'" | indent
-  cp "${custom_spark}" "${target_spark}" | indent
-else
-  echo "Writing default 'spark-defaults.conf.erb'" | indent
-  cp "${default_spark}" "${target_spark}" | indent
-fi
+cp -r $BP_DIR/.profile.d/* "$BUILD_DIR/.profile.d/" | indent
 
 if [ -f "${BUILD_DIR}/engine.json" ]
 then
-  topic "Build PredictionIO engine"
+  topic "PredictionIO engine"
 
-  # Move to dyno-runtime-compatible prefix for `pio build`
-  echo "Move to $app_prefix for 'pio build'" | indent
+  # Build with dyno runtime-compatible prefix.
+  # The PATH set in .profile.d/pio-env.sh must match.
+  # (`pio build` ends up capturing its absolute build path, so it needs
+  # to align with the actual runtime.)
+  app_namespace="pio-engine"
+  app_prefix="/app/${app_namespace}"
+  echo "Building at $app_prefix" | indent
   STAGE_THE_BUILD=$CACHE_DIR/app-prefix-stage
   mkdir -p $STAGE_THE_BUILD
   mv $BUILD_DIR/* $STAGE_THE_BUILD/
@@ -260,10 +71,10 @@ then
 
   if [ "${PIO_VERBOSE:-}" = "true" ]
   then
-    $dist_name/bin/pio build --verbose | indent
+    $PIO_DIST_NAME/bin/pio build --verbose | indent
   else
     echo 'Quietly logging. (Set `PIO_VERBOSE=true` for detailed build log.)' | indent
-    $dist_name/bin/pio build | indent
+    $PIO_DIST_NAME/bin/pio build | indent
   fi
 
   echo "Clean-up build artifacts" | indent

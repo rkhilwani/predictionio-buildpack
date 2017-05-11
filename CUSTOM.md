@@ -6,6 +6,7 @@
 
 🗺 See the [buildpack README](README.md) for an overview of the tools used in these docs.
 
+🛠 See [local development](DEV.md) to work directly with an engine.
 
 ## Docs 📚
 
@@ -39,7 +40,7 @@ Please, follow the steps in the order documented.
 * [Configuration](#configuration)
   * [Environment variables](#environment-variables)
 * [Running commands](#running-commands)
-* [Local development](#local-dev)
+* [Local development](#local-development)
 
 
 ## Eventserver
@@ -387,15 +388,6 @@ Check engine status:
 heroku run pio status
 ```
 
-## Local dev
+## Local development
 
-[Compile PredictionIO](http://predictionio.incubator.apache.org/install/install-sourcecode/) to locally match the language & dependency versions deployed with the buildpack:
-
-```bash
-./make-distribution.sh \
-  -Dscala.version=2.11.8 \
-  -Dspark.version=2.1.0 \
-  -Dhadoop.version=2.7.3 \
-  -Delasticsearch.version=5.1.1
-```
-
+▶️ see [Local development](DEV.md)

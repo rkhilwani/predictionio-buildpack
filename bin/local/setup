@@ -1,0 +1,35 @@
+#!/bin/bash
+
+# Debug, echo every command
+#set -x
+
+BUILD_DIR="$(pwd)"
+# The buildpack dir is two directories up from this script.
+BP_DIR="$(cd $(dirname ${0:-}); cd ../..; pwd)"
+
+echo
+echo "Installing to $BUILD_DIR/PredictionIO-dist ⚙️"
+echo
+
+if [ -f "$BUILD_DIR/.env" ]
+  then
+  echo '-----> Loading .env file'
+  for LINE in `cat $BUILD_DIR/.env`
+  do
+    eval "export $LINE"
+  done
+fi
+
+source $BP_DIR/bin/common/setup-runtime "$BUILD_DIR"
+
+source $BP_DIR/bin/local/env
+
+echo
+echo 'If the authenticated Elasticsearch patch is required,'
+echo 'then revise `build.sbt`:'
+echo
+echo '  * update: "0.11.0-incubating" to: "0.11.0-SNAPSHOT"'
+echo '  * append: resolvers += "Buildpack Repository" at "file://"+baseDirectory.value+"/repo"'
+echo
+echo 'PredictionIO is setup 🐸'
+echo
