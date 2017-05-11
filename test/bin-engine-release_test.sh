@@ -50,7 +50,7 @@ test_release_train_may_be_disabled()
 
   capture ${BUILDPACK_HOME}/bin/engine/heroku-buildpack-pio-release
   assertEquals 0 ${rtrn}
-  assertEquals "" "$(cat ${STD_OUT})"
+  assertEquals "Skipping train on release" "$(cat ${STD_OUT})"
   assertEquals "" "$(cat ${STD_ERR})"
 }
 
