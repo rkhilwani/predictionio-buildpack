@@ -3,7 +3,8 @@
 # Debug, echo every command
 #set -x
 
-echo 'Setup environment'
+echo
+echo 'Setup environment ⚙️'
 echo
 
 BUILD_DIR="$(pwd)"
@@ -51,4 +52,5 @@ echo
 env | grep PIO_
 echo
 
-echo 'Environment is ready.'
+echo 'Environment is ready 🚀'
+echo

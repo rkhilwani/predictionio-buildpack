@@ -445,18 +445,15 @@ echo 'PredictionIO-dist/' >> .gitignore
 echo 'repo/'              >> .gitignore
 
 # Setup this working directory:
-$PIO_BUILDPACK_DIR/bin/local/setup
-
-# …and initialize the environment:
-source $PIO_BUILDPACK_DIR/bin/local/env
+source $PIO_BUILDPACK_DIR/bin/local/setup
 ```
-
-⚠️ Note that `setup` naively appends to `build.sbt` each time. This change should not be committed. We hope to remove this local Maven repo requirement someday.
 
 #### Refreshing the environment
 
-* rerun `bin/local/setup` whenever an env var is changed that effects dependencies, like `PIO_S3_*` or `PIO_ELASTICSEARCH_*` variables
-* rerun `bin/local/env` whenever starting in a new terminal or an env var is changed
+Rerun `bin/local/setup` whenever an env var is changed that effects dependencies, like:
+
+* `PIO_S3_*` or
+* `PIO_ELASTICSEARCH_*` variables.
 
 ### 4. Elasticsearch (optional)
 
@@ -469,6 +466,16 @@ cd engine-dir/PredictionIO-dist/elasticsearch
 bin/elasticsearch
 ```
 
+If the [Authenticated Elasticsearch patch](https://github.com/apache/incubator-predictionio/pull/372) is required (e.g. for the [Universal Recommender](https://github.com/heroku/predictionio-engine-ur)), then revise:
+
+* **build.sbt**
+  * change: `"0.11.0-incubating"` to: `"0.11.0-SNAPSHOT"`
+  * append: `resolvers += "Buildpack Repository" at "file://"+baseDirectory.value+"/repo"`
+* **template.json**
+  * change: `"0.11.0-incubating"` to: `"0.11.0-SNAPSHOT"`
+
+These changes will make the engine use the snapshot build included in the buildpack's `repo/`.
+
 ### 5. Eventserver (optional)
 
 In a new terminal,
@@ -477,6 +484,14 @@ In a new terminal,
 cd engine-dir/
 source $PIO_BUILDPACK_DIR/bin/local/env
 pio eventserver
+```
+
+### 6. Load environment
+
+Run `bin/local/env` after initial setup, whenever starting in a new terminal, or if an environment variable is changed:
+
+```bash
+source $PIO_BUILDPACK_DIR/bin/local/env
 ```
 
 ### 6. Finally, use `pio`

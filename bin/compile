@@ -24,6 +24,15 @@ export_env_dir "$ENV_DIR" '^PREDICTIONIO_DIST_URL$'
 
 source ./common/setup-runtime "$BUILD_DIR" "$BP_DIR"
 
+if [ -d "$BP_DIR/repo" ]
+  then
+  echo "+ local Maven repo from buildpack" | indent
+  cp -r $BP_DIR/repo $BUILD_DIR/
+  (echo && \
+    echo '// Search for packages provided by predictionio-buildpack' && \
+    echo 'resolvers += "Local Repository" at "file://"+baseDirectory.value+"/repo"') >> $BUILD_DIR/build.sbt
+fi
+
 echo "Set-up environment via '.profile.d/' scripts" | indent
 mkdir -p "$BUILD_DIR/.profile.d"
 cp -r $BP_DIR/.profile.d/* "$BUILD_DIR/.profile.d/" | indent
