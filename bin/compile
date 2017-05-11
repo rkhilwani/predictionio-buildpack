@@ -35,7 +35,7 @@ BP_DIR=$(cd $(dirname ${0:-}); cd ..; pwd)
 export_env_dir "$ENV_DIR" '^(PIO_\w+|DATABASE_URL)$'
 export_env_dir "$ENV_DIR" '^PREDICTIONIO_DIST_URL$'
 
-source ./common/setup-runtime "$BUILD_DIR" "$BP_DIR"
+source ./bin/common/setup-runtime "$BUILD_DIR" "$BP_DIR"
 
 if [ -d "$BP_DIR/repo" ]
   then
