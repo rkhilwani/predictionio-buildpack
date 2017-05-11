@@ -6,6 +6,7 @@
 
 🗺 See the [buildpack README](README.md) for an overview of the tools used in these docs.
 
+🛠 See [local development](DEV.md) to work directly with an engine.
 
 ## Docs 📚
 
@@ -386,3 +387,7 @@ Check engine status:
 ```bash
 heroku run pio status
 ```
+
+## Local development
+
+▶️ see [Local development](DEV.md)
