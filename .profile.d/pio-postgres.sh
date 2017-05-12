@@ -33,7 +33,7 @@ else
     # extract the path (if any)
     path="`echo $url | grep / | cut -d/ -f2-`"
 
-    if [ "$PIO_POSTGRES_OPTIONAL_SSL" = "true" ]
+    if [ "${PIO_POSTGRES_OPTIONAL_SSL:-false}" = "true" ]
     then
         export PIO_STORAGE_SOURCES_PGSQL_URL=jdbc:postgresql://$hostport/$path
     else
