@@ -156,6 +156,7 @@ if [ "${PIO_ELASTICSEARCH_URL:-}" ]
   curl -s -L "$ELASTICSEARCH_DIST_URL" > "elasticsearch.tar.gz"
   mkdir -p "$PIO_DIST_DIR/vendors/elasticsearch"
   tar -xz -f "elasticsearch.tar.gz" -C "$PIO_DIST_DIR/vendors/elasticsearch" --strip-components=1  | indent
+  rm "elasticsearch.tar.gz"
   # Overrideable config file
   default_elasticsearch="$BP_DIR/config/elasticsearch.yml.erb"
   custom_elasticsearch="$BUILD_DIR/config/elasticsearch.yml.erb"
