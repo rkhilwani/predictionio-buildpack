@@ -8,6 +8,10 @@ echo 'Setup environment ⚙️'
 echo
 
 BUILD_DIR="$(pwd)"
+# The buildpack dir is two directories up from this script.
+# Using `BASH_ARGS` here because this script is meant to be called
+# with bash's `source` function.
+BP_DIR="$(cd $(dirname ${BASH_ARGV[0]}); cd ../..; pwd)"
 
 if [ -f "$BUILD_DIR/.env" ]
   then
@@ -17,6 +21,9 @@ if [ -f "$BUILD_DIR/.env" ]
     eval "export $LINE"
   done
 fi
+
+echo '       Parsing DATABASE_URL'
+source "$BP_DIR/.profile.d/pio-postgres.sh"
 
 if [ -z "${PIO_ORIGINAL_PATH:-}" ]
   then
