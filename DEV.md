@@ -51,8 +51,13 @@ With a few commands, we'll install PredictionIO & its dependencies into `./Predi
 # First, change directory to the target engine:
 cd ~/my/projects/engine-dir/
 
-# Install the environment template; edit it if you need to:
+# Depending on the engine, an environment template may be available.
+# Copy & edit it:
 cp .env.local .env
+#
+# …or create a new one:
+echo 'PIO_EVENTSERVER_APP_NAME=my-engine' >> .env
+echo 'PIO_POSTGRES_OPTIONAL_SSL=true'     >> .env
 
 # Ignore the local dev artifacts
 echo '.env'               >> .gitignore
