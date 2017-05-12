@@ -1,11 +1,14 @@
 #!/bin/bash
 
+# Exit on error
+set -e
+
 # Debug, echo every command
 #set -x
 
 BUILD_DIR="$(pwd)"
 # The buildpack dir is two directories up from this script.
-BP_DIR="$(cd $(dirname ${BASH_ARGV[0]}); cd ../..; pwd)"
+BP_DIR="$(cd $(dirname ${0:-}); cd ../..; pwd)"
 
 echo
 echo "Installing to $BUILD_DIR/PredictionIO-dist ⚙️"
@@ -20,9 +23,7 @@ if [ -f "$BUILD_DIR/.env" ]
   done
 fi
 
-source $BP_DIR/bin/common/setup-runtime "$BUILD_DIR" "$BP_DIR"
-
-source $BP_DIR/bin/local/env
+$BP_DIR/bin/common/setup-runtime "$BUILD_DIR" "$BP_DIR"
 
 echo
 echo 'If the authenticated Elasticsearch patch is required,'

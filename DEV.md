@@ -60,7 +60,10 @@ echo 'PredictionIO-dist/' >> .gitignore
 echo 'repo/'              >> .gitignore
 
 # Setup this working directory:
-source $PIO_BUILDPACK_DIR/bin/local/setup
+$PIO_BUILDPACK_DIR/bin/local/setup
+
+# Load the environment:
+source $PIO_BUILDPACK_DIR/bin/local/env
 ```
 
 #### Refreshing the setup
@@ -98,7 +101,7 @@ source $PIO_BUILDPACK_DIR/bin/local/setup
 In a new terminal, from the engine's directory:
 
 ```bash
-cd PredictionIO-dist/elasticsearch/
+cd PredictionIO-dist/vendors/elasticsearch/
 bin/elasticsearch
 ```
 
