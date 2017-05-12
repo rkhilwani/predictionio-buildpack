@@ -2,7 +2,7 @@
 
 Use [predictionio-buildpack](README.md) to setup your local PredictionIO environment.
 
-To do any real development work with PredictionIO, you'll need to run it locally. We'll use the 🌱 [`bin/local/` features of predictionio-buildpack](https://github.com/heroku/predictionio-buildpack/tree/local-dev/bin/local) to simplify that setup procedure and ensure parity between the dev (local) & production (Heroku).
+To do any real development work with PredictionIO, you'll need to run it locally. We'll use the 🌱 [`bin/local/` scripts](https://github.com/heroku/predictionio-buildpack/tree/master/bin/local) to simplify that setup procedure and ensure parity between the dev (local) & production (Heroku).
 
 ## 1. PostgreSQL database 
 
