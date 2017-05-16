@@ -171,6 +171,12 @@ if [ "${PIO_ELASTICSEARCH_URL:-}" ]
   fi
 fi
 
+if [ -d "$BP_DIR/repo" ]
+  then
+  echo "+ local Maven repo from buildpack (contents)" | indent
+  cp -r $BP_DIR/repo $BUILD_DIR/
+fi
+
 if [ "${PIO_MAVEN_REPO:-}" ]
   then
   echo "+ Maven repo $PIO_MAVEN_REPO" | indent
