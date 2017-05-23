@@ -79,7 +79,7 @@ then
     PIO_VERSION=0.10.0-incubating
   elif [[ $requires_pio_version =~ ^0\.11\.0-SNAPSHOT ]]
     then
-    PIO_VERSION=0.11.0-SNAPSHOT-esclient-auth-v06
+    PIO_VERSION=0.11.0-SNAPSHOT-esclient-auth-v07
     PIO_BUILD_SPARK_VERSION=2.1.0
     PIO_BUILD_HADOOP_VERSION=2.7
   else
