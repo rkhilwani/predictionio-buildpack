@@ -1,12 +1,12 @@
-# Deploy [PredictionIO](http://predictionio.incubator.apache.org) to Heroku with a template or custom engine
+# Deploy [PredictionIO](http://predictionio.incubator.apache.org) to Heroku
 
-👓 Requires intermediate technical skills working with PredictionIO.
+👓 Requires intermediate technical skills working with PredictionIO and the Scala programming language.
 
 🍎 For an simpler demo of PredictionIO, try the [example Predictive Classification app](https://github.com/heroku/predictionio-engine-classification).
 
 🗺 See the [buildpack README](README.md) for an overview of the tools used in these docs.
 
-🛠 See [local development](DEV.md) to work directly with an engine.
+🛠 Follow the [local development](DEV.md) workflow to setup an engine on your computer.
 
 ## Docs 📚
 
@@ -39,8 +39,10 @@ Please, follow the steps in the order documented.
   1. [Re-deploy best parameters](#re-deploy-best-parameters)
 * [Configuration](#configuration)
   * [Environment variables](#environment-variables)
-* [Running commands](#running-commands)
+  * [`pio-env.sh` and other config files](#pio-env-sh-and-other-config-files)
 * [Local development](#local-development)
+  * [`pio-shell`](#pio-shell)
+* [Testing](#testing)
 
 
 ## Eventserver
@@ -371,23 +373,49 @@ Engine deployments honor the following config vars:
     heroku addons:create bonsai --version 5.1 --as PIO_ELASTICSEARCH
     ```
 
+### `pio-env.sh` and other config files
 
-## Running commands
-
-#### To run directly with Heroku CLI
-
-```bash
-heroku run pio $command
-```
-
-#### Useful commands
-
-Check engine status:
-
-```bash
-heroku run pio status
-```
+The buildpack comes with [`config/`](config/) ERB templates that are rendered using the current [environment variables](#environment-variables) when the app is launched. Any one of these may be customized by creating a `config/` directory in your engine and copying over the template from this buildpack. Use caution when making modifications, as these configs are preset to work on Heroku.
 
 ## Local development
 
-▶️ see [Local development](DEV.md)
+▶️ setup an engine for the [local development](DEV.md) workflow
+
+### `pio-shell`
+
+Use the interactive Scala REPL to work with an engine locally.
+
+```bash
+pio-shell \
+  --with-spark \
+  --jars PredictionIO-dist/lib/pio-assembly-0.11.0-SNAPSHOT.jar,PredictionIO-dist/lib/postgresql_jdbc.jar,PredictionIO-dist/lib/spark/pio-data-elasticsearch-assembly-0.11.0-SNAPSHOT.jar,PredictionIO-dist/lib/spark/pio-data-jdbc-assembly-0.11.0-SNAPSHOT.jar
+```
+
+(This following command includes a `--jars` fix for PIO 0.11.0-incubating. If you're not using [local development](DEV.md) workflow, then those paths will be different for your own setup.)
+
+Then, load the necessary classes to load some event data:
+
+```scala
+scala> import org.apache.predictionio.data.store.PEventStore
+scala> PEventStore.aggregateProperties(appName="my-app", entityType="user")(sc).collect { case(i,p) => i }.take(5).foreach(println)
+```
+
+## Testing
+
+### Buildpack [![Build Status](https://travis-ci.org/heroku/predictionio-buildpack.svg?branch=master)](https://travis-ci.org/heroku/predictionio-buildpack)
+
+[Tests](test/) covering this buildpack's build and release functionality are implemented with [heroku-buildpack-testrunner](https://github.com/heroku/heroku-buildpack-testrunner). Engine test cases are staged in the [`test/fixtures/`](test/fixtures/).
+
+Setup [testrunner with Docker](https://github.com/heroku/heroku-buildpack-testrunner#docker-usage), then run tests with:
+
+```bash
+docker-compose -p pio -f test/docker-compose.yml run testrunner
+```
+
+### Individual Apps
+
+Engines deployed as Heroku apps may automatically run their `sbt test` suite using [Heroku CI (beta)](https://devcenter.heroku.com/articles/heroku-ci):
+
+>Heroku CI automatically runs tests for every subsequent push to your GitHub repository. Any push to any branch triggers a test run, including a push to master. This means that all GitHub pull requests are automatically tested, along with any merges to master.
+>
+> Test runs are executed inside an ephemeral Heroku app that is provisioned for the test run. The app is destroyed when the run completes.
