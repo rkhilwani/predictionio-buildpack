@@ -49,9 +49,7 @@ Please, follow the steps in the order documented.
 
 ### Create the eventserver
 
-⚠️ **An eventserver may host data for multiple engines.** If you already have one provisioned, you may skip to the [engine](#engine).
-
-⚠️ **Not required for engines that exclusively use a custom data source.**
+⚠️ **Each engine should have its own eventserver.** It's *possible* to share a event storage between engines only if they share the same storage backends and configuration. Otherwise, various storage-related errors will emerge and break the engine. *This is a change from the previous advice given here.*
 
 ```bash
 git clone https://github.com/heroku/predictionio-buildpack.git pio-eventserver
