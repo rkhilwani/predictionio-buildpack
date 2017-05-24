@@ -7,6 +7,7 @@ test_compile_with_predictionio_0_10_0() {
 
   # Existence triggers install of AWS SDK & Hadoop-AWS
   export PIO_S3_BUCKET_NAME="my-test-bucket"
+  export PIO_POSTGRES_OPTIONAL_SSL=true
 
   compile
 
@@ -52,6 +53,7 @@ SKIP_test_compile_with_predictionio_0_11_0() {
 
   # Existence triggers install of AWS SDK & Hadoop-AWS
   export PIO_S3_BUCKET_NAME="my-test-bucket"
+  export PIO_POSTGRES_OPTIONAL_SSL=true
 
   compile
 
