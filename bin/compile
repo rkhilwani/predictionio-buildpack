@@ -49,6 +49,23 @@ echo "Set-up environment via '.profile.d/' scripts" | indent
 mkdir -p "$BUILD_DIR/.profile.d"
 cp -r $BP_DIR/.profile.d/* "$BUILD_DIR/.profile.d/" | indent
 
+topic "Install JVM (heroku/jvm-common)"
+# Method from https://elements.heroku.com/buildpacks/heroku/heroku-buildpack-jvm-common
+set +u # allowed undeclared vars
+
+# download the buildpack
+JVM_COMMON_BUILDPACK=${JVM_COMMON_BUILDPACK:-https://codon-buildpacks.s3.amazonaws.com/buildpacks/heroku/jvm-common.tgz}
+mkdir -p /tmp/jvm-common
+curl --silent --location $JVM_COMMON_BUILDPACK | tar xzm -C /tmp/jvm-common --strip-components=1
+. /tmp/jvm-common/bin/util
+. /tmp/jvm-common/bin/java
+
+# install JDK
+javaVersion=$(detect_java_version ${BUILD_DIR})
+install_java ${BUILD_DIR} ${javaVersion}
+
+set -u # reset to not allow undeclared vars
+
 if [ -f "${BUILD_DIR}/engine.json" ]
 then
   topic "PredictionIO engine"
