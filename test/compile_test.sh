@@ -1,7 +1,7 @@
 #!/bin/sh
 . ${BUILDPACK_HOME}/test/helper.sh
 
-test_compile_with_predictionio_0_10_0() {
+SKIP_test_compile_with_predictionio_0_10_0() {
   ENGINE_FIXTURE_DIR="$BUILDPACK_HOME/test/fixtures/predictionio-engine-classification-4.0.0"
   cp -r $ENGINE_FIXTURE_DIR/* $ENGINE_FIXTURE_DIR/.[!.]* $BUILD_DIR
 
@@ -47,7 +47,7 @@ test_compile_with_predictionio_0_10_0() {
   # capture /app/bin/heroku-buildpack-pio-web
 }
 
-SKIP_test_compile_with_predictionio_0_11_0() {
+test_compile_with_predictionio_0_11_0() {
   ENGINE_FIXTURE_DIR="$BUILDPACK_HOME/test/fixtures/predictionio-engine-classification-4.0.0-pio-0.11.0"
   cp -r $ENGINE_FIXTURE_DIR/* $ENGINE_FIXTURE_DIR/.[!.]* $BUILD_DIR
 
