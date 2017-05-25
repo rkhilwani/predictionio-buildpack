@@ -145,3 +145,7 @@ To run the Eventserver, use a new terminal:
 cd ~/my/projects/engine-dir/
 bin/pio eventserver
 ```
+
+## Deployment
+
+▶️ [How to deploy to Heroku](CUSTOM.md)
