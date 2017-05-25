@@ -8,6 +8,25 @@ To do any real development work with PredictionIO, you'll need to run it locally
 
 This local dev technique sets up a complete installation of PredictionIO inside each engine you wish to work on. Each engine may have different configuration and dependencies, so the entire environment is contained within an engine directory.
 
+## Supported Platforms
+
+This workflow augments the Heroku/Linux-based deployment, and so only supports similar platforms:
+
+### Works
+
+* macOS ⭐️ **primary, best experience**
+* Debian/Ubuntu Linux
+
+### Should Work
+
+* Linux via Docker or virtualization
+* Windows 10 w/ Linux subsystem
+
+### Not Working
+
+* Windows MS/DOS or PowerShell
+* mobile OSs
+
 ## How-to
 
 ### 1. PostgreSQL database 
@@ -60,6 +79,7 @@ echo 'PIO_EVENTSERVER_APP_NAME=my-engine' >> .env
 echo 'PIO_POSTGRES_OPTIONAL_SSL=true'     >> .env
 
 # Ignore the local dev artifacts
+echo                      >> .gitignore
 echo 'bin/pio'            >> .gitignore
 echo '.env'               >> .gitignore
 echo 'PredictionIO-dist/' >> .gitignore
