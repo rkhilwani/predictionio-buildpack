@@ -76,7 +76,8 @@ test_compile_with_predictionio_0_11_0() {
   mv $BUILD_DIR/* $BUILD_DIR/.[!.]* /app/
   cd /app/pio-engine
 
-  capture ./PredictionIO-dist/bin/pio status
+  # Workaround: JDBC driver cannot be found in the Docker context :-/
+  capture ./PredictionIO-dist/bin/pio status -- --driver-class-path ./PredictionIO-dist/lib/postgresql_jdbc.jar
 
   assertEquals "\`pio status\` exit code was ${RETURN} instead of 0" "0" "${RETURN}"
   assertContains "PredictionIO 0.11.0-incubating" "$(cat ${STD_OUT})"
