@@ -1,11 +1,19 @@
 #!/bin/bash
 
-# Debug, echo every command
+# Debug, echoes every command
 #set -x
 
-echo
-echo 'Setup environment ⚙️'
-echo
+maybeEcho() {
+  local message="${1:-}"
+  if [ "${QUIET_ENV:-false}" != "true" ]
+    then
+    echo "${message}"
+  fi
+}
+
+maybeEcho
+maybeEcho 'Setup environment ⚙️'
+maybeEcho
 
 if [ -z "${BASH_ARGV:-}" ]
   then
@@ -23,52 +31,50 @@ BP_DIR="$(cd $(dirname ${BASH_ARGV[0]}); cd ../..; pwd)"
 
 if [ -f "$BUILD_DIR/.env" ]
   then
-  echo '-----> Loading .env file'
+  maybeEcho '-----> Loading .env file'
   for LINE in `cat $BUILD_DIR/.env`
   do
     eval "export $LINE"
   done
 fi
 
-echo '       Parsing PIO_ELASTICSEARCH_URL'
+maybeEcho '       Parsing PIO_ELASTICSEARCH_URL'
 source "$BP_DIR/.profile.d/pio-elasticsearch.sh"
 
-echo '       Parsing DATABASE_URL'
+maybeEcho '       Parsing DATABASE_URL'
 source "$BP_DIR/.profile.d/pio-postgres.sh"
 
 if [ -z "${PIO_ORIGINAL_PATH:-}" ]
   then
   export PIO_ORIGINAL_PATH=$PATH
 fi
-echo '-----> Updating $PATH'
-export PATH=$BUILD_DIR/PredictionIO-dist/sbt:$BUILD_DIR/PredictionIO-dist/bin:$PIO_ORIGINAL_PATH
+maybeEcho '-----> Updating $PATH'
+export PATH=$BUILD_DIR/bin:$BUILD_DIR/PredictionIO-dist/bin:$BUILD_DIR/PredictionIO-dist/sbt:$PIO_ORIGINAL_PATH
 
-echo '-----> Rendering configs'
+maybeEcho '-----> Rendering configs'
 core_site_template=$BUILD_DIR/PredictionIO-dist/conf/core-site.xml.erb
 elasticsearch_template=$BUILD_DIR/PredictionIO-dist/conf/elasticsearch.yml.erb
 spark_template=$BUILD_DIR/PredictionIO-dist/vendors/spark-hadoop/conf/spark-defaults.conf.erb
 
 if [ -f "$core_site_template" ]
 then
-  echo '       + config/core-site.xml (Hadoop)'
+  maybeEcho '       + config/core-site.xml (Hadoop)'
   erb $core_site_template > $BUILD_DIR/PredictionIO-dist/conf/core-site.xml
 fi
 
 if [ -f "$elasticsearch_template" ]
 then
-  echo '       + config/elasticsearch.yml'
+  maybeEcho '       + config/elasticsearch.yml'
   erb $elasticsearch_template > $BUILD_DIR/PredictionIO-dist/conf/elasticsearch.yml
 fi
 
 if [ -f "$spark_template" ]
 then
-  echo '       + config/spark-defaults.conf'
+  maybeEcho '       + config/spark-defaults.conf'
   erb $spark_template > $BUILD_DIR/PredictionIO-dist/vendors/spark-hadoop/conf/spark-defaults.conf
 fi
 
-echo
-env | grep PIO_
-echo
+#env | grep PIO_
 
-echo 'Environment is ready 🚀'
-echo
+echo 'Environment loaded 🚀'
+maybeEcho

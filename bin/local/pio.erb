@@ -1,0 +1,20 @@
+#!/bin/bash
+
+# Exit failure on any error
+set -e
+
+# Debug, echoes every command
+#set -x
+
+# This value is rendered by Ruby/ERB in the 
+# buildpack's `bin/local/setup`
+PIO_BUILDPACK_DIR="<%= ENV['PIO_BUILDPACK_DIR'] %>"
+
+# Load environment variables & render configs.
+QUIET_ENV=true
+source $PIO_BUILDPACK_DIR/bin/local/env
+
+# Invoke the real `pio` (installed by `bin/local/setup`)
+# with the original arguments.
+echo "./PredictionIO-dist/bin/pio $@"
+./PredictionIO-dist/bin/pio $@

@@ -60,20 +60,18 @@ echo 'PIO_EVENTSERVER_APP_NAME=my-engine' >> .env
 echo 'PIO_POSTGRES_OPTIONAL_SSL=true'     >> .env
 
 # Ignore the local dev artifacts
+echo 'bin/pio'            >> .gitignore
 echo '.env'               >> .gitignore
 echo 'PredictionIO-dist/' >> .gitignore
 echo 'repo/'              >> .gitignore
 
 # Setup this working directory:
 $PIO_BUILDPACK_DIR/bin/local/setup
-
-# Load the environment:
-source $PIO_BUILDPACK_DIR/bin/local/env
 ```
 
 #### Refreshing the setup
 
-♻️ Run `…/bin/local/setup` whenever an env var is changed that effects dependencies, like:
+♻️ Run `…/bin/local/setup` if the buildpack is updated/moved or whenever an environment variable (including the `.env` file) is changed that effects dependencies, like:
 
 * `PIO_S3_*` or
 * `PIO_ELASTICSEARCH_*`
@@ -84,7 +82,7 @@ source $PIO_BUILDPACK_DIR/bin/local/env
 
 #### Configure ES
 
-1. In the engine, open `.env/` and add the default local address for ES:
+1. In the engine, open `.env` file and add the default local address for ES:
 
     ```bash
     PIO_ELASTICSEARCH_URL=http://127.0.0.1:9200
@@ -110,33 +108,20 @@ cd PredictionIO-dist/vendors/elasticsearch/
 bin/elasticsearch
 ```
 
-### 5. Eventserver (optional)
+### 5. Finally, use `bin/pio`
 
-In a new terminal,
+```bash
+bin/pio status
+bin/pio app new my-engine-name
+bin/pio build --verbose
+# Importing data is required before training will succeed
+bin/pio train -- --driver-memory 8G
+bin/pio deploy
+```
+
+To run the Eventserver, use a new terminal:
 
 ```bash
 cd ~/my/projects/engine-dir/
-source $PIO_BUILDPACK_DIR/bin/local/env
-pio eventserver
-```
-
-### 6. Load environment
-
-♻️ Perform this step whenever starting in a new terminal or if an environment variable is changed.
-
-✏️ *Replace `$PIO_BUILDPACK_DIR` with the path of **predictionio-buildpack** from step 2.*
-
-```bash
-source $PIO_BUILDPACK_DIR/bin/local/env
-```
-
-### 7. Finally, use `pio`
-
-```bash
-pio status
-pio app new my-engine-name
-pio build --verbose
-# Importing data is required before training will succeed
-pio train -- --driver-memory 8G
-pio deploy
+bin/pio eventserver
 ```
