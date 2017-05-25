@@ -72,12 +72,31 @@ test_compile_with_predictionio_0_11_0() {
   expected_output="$BUILD_DIR/pio-engine/target/scala-2.11/template-scala-parallel-classification-assembly-0.1-SNAPSHOT-deps.jar"
   assertTrue "missing Scala build output: $expected_output" "[ -f $expected_output ]"
 
+  echo '-----> Patch `bin/pio-class` for debugging'
+  cp -f $BUILDPACK_HOME/test/pio-class $BUILD_DIR/pio-engine/PredictionIO-dist/bin/pio-class
+
   echo "-----> Stage build for testing in /app/pio-engine (same as dyno runtime)"
   mv $BUILD_DIR/* $BUILD_DIR/.[!.]* /app/
+
+  echo '-----> /app/pio-engine/PredictionIO-dist/lib/postgresql_jdbc.jar exists?'
+  if [ -f "/app/pio-engine/PredictionIO-dist/lib/postgresql_jdbc.jar" ]
+    then echo '       YES'
+    else echo '       NO'
+  fi
+  ls -hal /app/pio-engine/PredictionIO-dist/lib
+  # echo "       Set PIO_HOME=/app/pio-engine/PredictionIO-dist"
+  # export PIO_HOME=/app/pio-engine/PredictionIO-dist
+  # export PIO_CONF_DIR=/app/pio-engine/PredictionIO-dist/conf
+  # echo '       PIO classpath'
+  # /app/pio-engine/PredictionIO-dist/bin/compute-classpath.sh
+  # echo "       Load .profile.d scripts"
+  # . /app/.profile.d/pio-elasticsearch.sh
+  # . /app/.profile.d/pio-postgres.sh
+  # . /app/.profile.d/pio-render-configs.sh
+  echo '       cd /app/pio-engine'
   cd /app/pio-engine
 
-  # Workaround: JDBC driver cannot be found in the Docker context :-/
-  capture ./PredictionIO-dist/bin/pio status -- --driver-class-path ./PredictionIO-dist/lib/postgresql_jdbc.jar
+  capture ./PredictionIO-dist/bin/pio status --verbose
 
   assertEquals "\`pio status\` exit code was ${RETURN} instead of 0" "0" "${RETURN}"
   assertContains "PredictionIO 0.11.0-incubating" "$(cat ${STD_OUT})"

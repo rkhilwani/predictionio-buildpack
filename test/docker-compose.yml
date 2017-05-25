@@ -11,7 +11,7 @@ services:
     depends_on:
       - postgres
     environment:
-      DATABASE_URL: postgres://pio:pio@postgres:5432/pio
+      DATABASE_URL: postgres://pio:pio@postgres/pio
       PIO_POSTGRES_OPTIONAL_SSL: "true"
     volumes:
       - ~/magic_curl_cache:/tmp/magic_curl_cache
