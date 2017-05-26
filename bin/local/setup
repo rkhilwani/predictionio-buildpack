@@ -25,6 +25,14 @@ fi
 
 $BP_DIR/bin/common/setup-runtime "$BUILD_DIR" "$BP_DIR"
 
+mkdir -p $BUILD_DIR/bin
+# Set this directory path for the ERB template.
+export PIO_BUILDPACK_DIR="$BP_DIR"
+echo "-----> Installing \`bin/pio\`"
+echo "       with environment ${PIO_BUILDPACK_DIR}/bin/local/env"
+erb $BP_DIR/bin/local/pio.erb > $BUILD_DIR/bin/pio
+chmod +x $BUILD_DIR/bin/pio
+
 echo
 echo 'If the authenticated Elasticsearch patch is required,'
 echo 'then revise `build.sbt`:'
@@ -33,4 +41,7 @@ echo '  * update: "0.11.0-incubating" to: "0.11.0-SNAPSHOT"'
 echo '  * append: resolvers += "Buildpack Repository" at "file://"+baseDirectory.value+"/repo"'
 echo
 echo 'PredictionIO is setup 🐸'
+echo 'Use it with:'
+echo
+echo '  bin/pio'
 echo

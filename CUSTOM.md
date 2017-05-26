@@ -57,9 +57,7 @@ cd pio-eventserver
 
 heroku create $EVENTSERVER_NAME
 heroku addons:create heroku-postgresql:hobby-dev
-# Note the buildpacks differ for eventserver & engine (below)
-heroku buildpacks:add -i 1 https://github.com/heroku/predictionio-buildpack.git
-heroku buildpacks:add -i 2 heroku/scala
+heroku buildpacks:set https://github.com/heroku/predictionio-buildpack
 ```
 
 * Note the Postgres add-on identifier, e.g. `postgresql-aerodynamic-00000`; use it below in place of `$POSTGRES_ADDON_ID`
@@ -92,9 +90,7 @@ git init
 
 ```bash
 heroku create $ENGINE_NAME
-# Note the buildpacks differ for eventserver (above) & engine
-heroku buildpacks:add -i 1 https://github.com/heroku/heroku-buildpack-jvm-common.git
-heroku buildpacks:add -i 2 https://github.com/heroku/predictionio-buildpack.git
+heroku buildpacks:set https://github.com/heroku/predictionio-buildpack
 ```
 
 ### Optional Persistent Filesystem
