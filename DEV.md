@@ -91,16 +91,28 @@ $PIO_BUILDPACK_DIR/bin/local/setup
 
 #### Refreshing the setup
 
-♻️ Run `…/bin/local/setup` if the buildpack is updated/moved or whenever an environment variable (including the `.env` file) is changed that effects dependencies, like:
+♻️ Run `bin/local/setup` whenever:
 
-* `PIO_S3_*` or
-* `PIO_ELASTICSEARCH_*`
+  * the buildpack is updated/moved
+  * an environment variable (including the `.env` file) is changed that effects dependencies, like:
+    * `PIO_S3_*` or
+    * `PIO_ELASTICSEARCH_*`
+
+Here's how:
+
+```bash
+# Capture the path to the buildpack on your machine (from Step 2.)
+export PIO_BUILDPACK_DIR=~/my/projects/predictionio-buildpack
+
+# Then, inside the engine to refresh,
+$PIO_BUILDPACK_DIR/bin/local/setup
+```
 
 ### 4. Elasticsearch (optional)
 
-⚠️ *Only available if `PIO_ELASTICSEARCH_URL` is set.*
+⚠️ *Only available if `PIO_ELASTICSEARCH_URL` is set during `bin/local/setup`.*
 
-#### Configure ES
+#### Configure Elasticsearch
 
 1. In the engine, open `.env` file and add the default local address for ES:
 
@@ -119,7 +131,7 @@ $PIO_BUILDPACK_DIR/bin/local/setup
 
     These changes will make the engine use the snapshot build included in the buildpack's `repo/`.
 
-#### Run ES
+#### Run Elasticsearch
 
 In a new terminal, from the engine's directory:
 
@@ -139,10 +151,13 @@ bin/pio train -- --driver-memory 8G
 bin/pio deploy
 ```
 
-To run the Eventserver, use a new terminal:
+👓 the `bin/pio` command reads the local environment (config vars) from the local `.env` file everytime it's invoked.
+
+#### Run Eventserver
+
+In a new terminal, from the engine's directory:
 
 ```bash
-cd ~/my/projects/engine-dir/
 bin/pio eventserver
 ```
 
