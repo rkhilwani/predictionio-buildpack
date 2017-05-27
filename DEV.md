@@ -35,6 +35,9 @@ This workflow augments the Heroku/Linux-based deployment, and so only supports s
 
 1. Install [Java/JDK 8](https://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
 1. Install [PostgreSQL 9.6](https://www.postgresql.org/download/); for macOS, we 💜 [Postgres.app](http://postgresapp.com)
+   1. start Postgres
+      * for **Postgres.app** use its elephant menubar widget
+      * varies by install method and platform
    1. create the database and grant access to work with the [buildpack's `pio-env.sh` config](https://github.com/heroku/predictionio-buildpack/blob/local-dev/config/pio-env.sh) (database `pio`, username `pio`, & password `pio`):
 
       ```bash
@@ -44,9 +47,6 @@ This workflow augments the Heroku/Linux-based deployment, and so only supports s
       GRANT ALL PRIVILEGES ON DATABASE pio TO pio;
       ALTER ROLE pio WITH LOGIN;
       ```
-   1. start Postgres
-      * for **Postgres.app** use its elephant menubar widget
-      * varies by install method and platform
 
 ### 2. The Buildpack
 
