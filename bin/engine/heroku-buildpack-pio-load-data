@@ -100,6 +100,11 @@ then
 
       if [ -f "$SYNC_DATA_FILEPATH" ]
         then
+        if [ "${PIO_PURGE_EVENTS_ON_SYNC:-false}" = "true" ]
+          then
+          echo 'Deleting existing event data, because `PIO_PURGE_EVENTS_ON_SYNC=true`'
+          eval "pio app data-delete -f $PIO_EVENTSERVER_APP_NAME"
+        fi
         echo "Syncing events for training to App ID $EVENTSERVER_APP_ID"
         eval "pio import --appid $EVENTSERVER_APP_ID --input $SYNC_DATA_FILEPATH -- ${S3_SUPPORT_OPTS:-}"
       else
