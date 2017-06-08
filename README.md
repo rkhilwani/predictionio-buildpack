@@ -18,7 +18,7 @@ Getting started with an engine:
 * [Classification demo](https://github.com/heroku/predictionio-engine-classification) presented at [Dreamforce 2016 "Exploring Machine Learning On Heroku"](https://www.salesforce.com/video/297129/)
 * [Template Gallery](https://predictionio.incubator.apache.org/gallery/template-gallery/) offers starting-points for many use-cases.
 
-🐸 [How to deploy a template or custom engine](CUSTOM.md)
+🐸 [How to deploy an engine](CUSTOM.md)
 
 ## Architecture
 
@@ -28,10 +28,12 @@ This buildpack transforms the [Scala](http://www.scala-lang.org) source-code of 
 
 The events data can be stored in:
 
-* **PredictionIO Eventserver** backed by Heroku PostgreSQL
-  * directly compatible with most engine templates
+* **PredictionIO event storage** backed by Heroku PostgreSQL
+  * compatible with this buildpack's [built-in Data Flow features](DATA.md) providing initial data load & sync automation
+  * compatible with most engine templates; required by some
+  * supports RESTful ingestion & querying via PredictionIO's built-in Eventserver
 * **custom data store** such as Heroku Connect with PostgreSQL or RDD/DataFrames stored in HDFS
-  * requires a custom implementaion of `DataSource.scala`.
+  * requires a highly technical, custom implementation of `DataSource.scala`
 
 ## Limitations
 
@@ -72,5 +74,7 @@ Heroku [config vars](https://devcenter.heroku.com/articles/config-vars) solve ma
 ## Development & Testing
 
 🛠 Follow the [local development](DEV.md) workflow to setup an engine on your computer.
+
+🔍 See the [Data Flow docs](DATA.md) for how to leverage the built-in import & sync workflow.
 
 🤓 Info for [testing](CUSTOM.md#testing) this buildpack & individual engines.
