@@ -52,7 +52,7 @@ Please, follow the steps in the order documented.
 
 ⚠️ **Each engine should have its own eventserver.** It's *possible* to share a event storage between engines only if they share the same storage backends and configuration. Otherwise, various storage-related errors will emerge and break the engine. *This is a change from the previous advice given here.*
 
-[![Deploy Eventserver](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy) with free Heroku Postgres database (limit 10K rows).
+[![Deploy Eventserver](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/heroku/predictionio-buildpack) with free Heroku Postgres database (limit 10K rows).
 
 If you need a larger (greater that 10K rows), then provision the eventserver manually on a paid database tier:
 
