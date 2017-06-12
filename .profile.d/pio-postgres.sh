@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Transform Postgres connection URL (Heroku config var) to PIO vars.
-if [ -z "${DATABASE_URL}" ]; then
+if [ -z "${DATABASE_URL:-}" ]; then
     export PIO_STORAGE_SOURCES_PGSQL_URL=jdbc:postgresql://localhost:5432/pio
     export PIO_STORAGE_SOURCES_PGSQL_USERNAME=pio
     export PIO_STORAGE_SOURCES_PGSQL_PASSWORD=pio
