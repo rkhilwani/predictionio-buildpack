@@ -52,21 +52,22 @@ Please, follow the steps in the order documented.
 
 ⚠️ **Each engine should have its own eventserver.** It's *possible* to share a event storage between engines only if they share the same storage backends and configuration. Otherwise, various storage-related errors will emerge and break the engine. *This is a change from the previous advice given here.*
 
+[![Deploy Eventserver](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy) with free Heroku Postgres database (limit 10K rows).
+
+If you need a larger (greater that 10K rows), then provision the eventserver manually on a paid database tier:
+
 ```bash
 git clone https://github.com/heroku/predictionio-buildpack.git pio-eventserver
 cd pio-eventserver
 
 heroku create $EVENTSERVER_NAME
-heroku addons:create heroku-postgresql:hobby-dev
 heroku buildpacks:set https://github.com/heroku/predictionio-buildpack
+heroku addons:create heroku-postgresql:hobby-basic
 ```
 
-* Note the Postgres add-on identifier, e.g. `postgresql-aerodynamic-00000`; use it below in place of `$POSTGRES_ADDON_ID`
-* You may want to specify `heroku-postgresql:standard-0` instead, because the free `hobby-dev` database is limited to 10,000 records.
+Note the Postgres add-on identifier, e.g. `postgresql-aerodynamic-00000`; use it below in place of `$POSTGRES_ADDON_ID`
 
-### Deploy the eventserver
-
-We delay deployment until the database is ready.
+We delay deployment until the database is ready:
 
 ```bash
 heroku pg:wait && git push heroku master

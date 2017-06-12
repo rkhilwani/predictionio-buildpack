@@ -2,10 +2,7 @@
   "name": "pio-eventserver",
   "description": "PredictionIO eventserver",
   "keywords": [
-    "predictionio",
-    "machinelearning",
-    "spark",
-    "sparkml"
+    "predictionio"
   ],
   "addons": [
     "heroku-postgresql"
@@ -13,9 +10,6 @@
   "buildpacks": [
     {
       "url": "https://github.com/heroku/predictionio-buildpack.git"
-    },
-    {
-      "url": "heroku/scala"
     }
   ]
 }
