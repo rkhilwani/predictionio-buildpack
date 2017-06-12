@@ -52,25 +52,46 @@ maybeEcho '-----> Updating $PATH'
 export PATH=$BUILD_DIR/bin:$BUILD_DIR/PredictionIO-dist/bin:$BUILD_DIR/PredictionIO-dist/sbt:$PIO_ORIGINAL_PATH
 
 maybeEcho '-----> Rendering configs'
-core_site_template=$BUILD_DIR/PredictionIO-dist/conf/core-site.xml.erb
-elasticsearch_template=$BUILD_DIR/PredictionIO-dist/conf/elasticsearch.yml.erb
-spark_template=$BUILD_DIR/PredictionIO-dist/vendors/spark-hadoop/conf/spark-defaults.conf.erb
+if [ -f "$BUILD_DIR/config/pio-env.sh" ]
+  then
+  maybeEcho '       + pio-env.sh (from custom config/pio-env.sh)'
+  cp "$BUILD_DIR/config/pio-env.sh" "$BUILD_DIR/PredictionIO-dist/conf/pio-env.sh"
+fi
 
-if [ -f "$core_site_template" ]
-then
-  maybeEcho '       + config/core-site.xml (Hadoop)'
+core_site_template=$BUILD_DIR/PredictionIO-dist/conf/core-site.xml.erb
+custom_core_site_template=$BUILD_DIR/config/core-site.xml.erb
+elasticsearch_template=$BUILD_DIR/PredictionIO-dist/conf/elasticsearch.yml.erb
+custom_elasticsearch_template=$BUILD_DIR/config/elasticsearch.yml.erb
+spark_template=$BUILD_DIR/PredictionIO-dist/vendors/spark-hadoop/conf/spark-defaults.conf.erb
+custom_spark_template=$BUILD_DIR/config/spark-defaults.conf.erb
+
+if [ -f "$custom_core_site_template" ]
+  then
+  maybeEcho '       + core-site.xml (Hadoop; from custom config/core-site.xml.erb)'
+  erb $custom_core_site_template > $BUILD_DIR/PredictionIO-dist/conf/core-site.xml
+elif [ -f "$core_site_template" ]
+  then
+  maybeEcho '       + core-site.xml (Hadoop)'
   erb $core_site_template > $BUILD_DIR/PredictionIO-dist/conf/core-site.xml
 fi
 
-if [ -f "$elasticsearch_template" ]
-then
-  maybeEcho '       + config/elasticsearch.yml'
+if [ -f "$custom_elasticsearch_template" ]
+  then
+  maybeEcho '       + elasticsearch.yml (from custom config/elasticsearch.yml.erb)'
+  erb $custom_elasticsearch_template > $BUILD_DIR/PredictionIO-dist/conf/elasticsearch.yml
+elif [ -f "$elasticsearch_template" ]
+  then
+  maybeEcho '       + elasticsearch.yml'
   erb $elasticsearch_template > $BUILD_DIR/PredictionIO-dist/conf/elasticsearch.yml
 fi
 
-if [ -f "$spark_template" ]
-then
-  maybeEcho '       + config/spark-defaults.conf'
+if [ -f "$custom_spark_template" ]
+  then
+  maybeEcho '       + spark-defaults.conf (from custom config/spark-defaults.conf.erb)'
+  erb $custom_spark_template > $BUILD_DIR/PredictionIO-dist/vendors/spark-hadoop/conf/spark-defaults.conf
+elif [ -f "$spark_template" ]
+  then
+  maybeEcho '       + spark-defaults.conf'
   erb $spark_template > $BUILD_DIR/PredictionIO-dist/vendors/spark-hadoop/conf/spark-defaults.conf
 fi
 
