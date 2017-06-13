@@ -7,7 +7,7 @@ set -o pipefail
 # Fail on undeclared variables.
 set -u
 # Debug, echo every command
-#set -x
+set -x
 
 APP_PREFIX="pio-engine"
 BIN_PATH="bin" # because compile script moves bin/ up to app/
@@ -19,6 +19,9 @@ SYNC_DATA_SCRIPT="data/create-sync-events"
 SYNC_DATA_SCRIPTPATH="$APP_PREFIX/$SYNC_DATA_SCRIPT"
 SYNC_DATA_FILE="data/sync-events.json"
 SYNC_DATA_FILEPATH="$APP_PREFIX/$SYNC_DATA_FILE"
+
+ls -hal $APP_PREFIX
+ls -hal $APP_PREFIX/data
 
 if [ -f "$CREATE_INITIAL_DATA_SCRIPTPATH" ] || [ -f "$INITIAL_DATA_FILEPATH" ] || [ -f "$SYNC_DATA_SCRIPTPATH" ]
 then
