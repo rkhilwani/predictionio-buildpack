@@ -105,7 +105,11 @@ then
   mv $app_prefix $BUILD_DIR || true
   # Move the Procfile(s) back to the top-level app directory or use default for engines
   # (`bin/release` default_process_types have no effect since this is never the last buildpack)
-  if [ -f "${BUILD_DIR}/${app_namespace}/Procfile" ]
+  if [ "${PIO_RUN_AS_EVENTSERVER:-false}" = "true" ]
+  then
+    echo "Using eventserver Procfile" | indent
+    cp "${BP_DIR}/Procfile-eventserver" "${BUILD_DIR}/Procfile"
+  elif [ -f "${BUILD_DIR}/${app_namespace}/Procfile" ]
   then
     echo "Using custom Procfile" | indent
     mv $BUILD_DIR/$app_namespace/Procfile* $BUILD_DIR

@@ -14,14 +14,10 @@
 
 Please, follow the steps in the order documented.
 
-* [Eventserver](#eventserver)
-  1. [Create the eventserver](#create-the-eventserver)
-  1. [Deploy the eventserver](#deploy-the-eventserver)
 * [Engine](#engine)
-  1. [Create an engine](#create-an-engine)
-     * [Optional Persistent Filesystem](#optional-persistent-filesystem)
-  1. [Create a Heroku app for the engine](#create-a-heroku-app-for-the-engine)
-  1. [Configure the Heroku app to use the eventserver](#configure-the-heroku-app-to-use-the-eventserver)
+  1. [Create the app](#create-an-engine)
+     * [Provision the database](#provision-the-database)
+     * [Optional persistent filesystem](#optional-persistent-filesystem)
   1. [Update source configs](#update-source-configs)
      1. [`template.json`](#update-template-json)
      1. [`build.sbt`](#update-build-sbt)
@@ -38,6 +34,8 @@ Please, follow the steps in the order documented.
   1. [Changes required for evaluation](#changes-required-for-evaluation)
   1. [Perform evaluation](#perform-evaluation)
   1. [Re-deploy best parameters](#re-deploy-best-parameters)
+* [Eventserver](#eventserver)
+  1. [Deploy the eventserver](#deploy-the-eventserver)
 * [Configuration](#configuration)
   * [Environment variables](#environment-variables)
   * [`pio-env.sh` and other config files](#pio-env-sh-and-other-config-files)
@@ -46,56 +44,33 @@ Please, follow the steps in the order documented.
 * [Testing](#testing)
 
 
-## Eventserver
-
-### Create the eventserver
-
-⚠️ **Each engine should have its own eventserver.** It's *possible* to share a event storage between engines only if they share the same storage backends and configuration. Otherwise, various storage-related errors will emerge and break the engine. *This is a change from the previous advice given here.*
-
-[![Deploy Eventserver](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/heroku/predictionio-buildpack) with free Heroku Postgres database (limit 10K rows).
-
-If you need a larger (greater that 10K rows), then provision the eventserver manually on a paid database tier:
-
-```bash
-git clone https://github.com/heroku/predictionio-buildpack.git pio-eventserver
-cd pio-eventserver
-
-heroku create $EVENTSERVER_NAME
-heroku buildpacks:set https://github.com/heroku/predictionio-buildpack
-heroku addons:create heroku-postgresql:hobby-basic
-```
-
-Note the Postgres add-on identifier, e.g. `postgresql-aerodynamic-00000`; use it below in place of `$POSTGRES_ADDON_ID`
-
-We delay deployment until the database is ready:
-
-```bash
-heroku pg:wait && git push heroku master
-```
-
-
 ## Engine
-
-Select an engine from the [gallery](https://predictionio.incubator.apache.org/gallery/template-gallery/). Download a `.tar.gz` from Github and open/expand it on your local computer.
 
 🏷 This buildpack should be used with engine templates for **PredictionIO 0.11**.
 
-### Create an engine
+🔋 Engines already optimized for Heroku are listed in the main [builpack README](README.md#engines).
+
+📐 Starting-points may be found in the [template gallery](https://predictionio.incubator.apache.org/gallery/template-gallery/). Download the `.tar.gz` from Github and open/expand it on your local computer.
+
+### Create the app
 
 `cd` into the engine's directory, and ensure it is a git repo:
 
 ```bash
 git init
-```
-
-### Create a Heroku app for the engine
-
-```bash
 heroku create $ENGINE_NAME
 heroku buildpacks:set https://github.com/heroku/predictionio-buildpack
 ```
 
-### Optional Persistent Filesystem
+#### Provision the database
+
+Use a higher-level paid plan for anything beyond a simple demo, e.g. `hobby-basic`.
+
+```bash
+heroku addons:create heroku-postgresql:hobby-dev
+```
+
+#### Optional persistent filesystem
 
 👓 Heroku dynos have an [ephemeral filesystem](https://devcenter.heroku.com/articles/dynos#ephemeral-filesystem).
 
@@ -114,21 +89,6 @@ To enable, either:
   * `PIO_S3_AWS_SECRET_ACCESS_KEY`
 
 ⚠️ Note that with HDFS on Heroku, all filesystem path references must be absolute from `/` root, not relative or nested in User ID directory.
-
-### Configure the Heroku app to use the eventserver
-
-⚠️ **Not required for engines that exclusively use a custom data source.**
-
-Replace the Postgres ID & eventserver config values with those from above:
-
-```bash
-heroku addons:attach $POSTGRES_ADDON_ID
-
-heroku config:set PIO_EVENTSERVER_APP_NAME=$PIO_APP_NAME
-# must match `appName` in engine.json & eventserver
-```
-
-* See [environment variables](#environment-variables) for config details.
 
 ### Update source configs
 
@@ -185,18 +145,28 @@ Many community-contributed engine templates provide a Python `data/import_events
 
 With this buildpack, initial data import and ongoing synchronization may be automated using script hooks to generate JSON data that is automatically imported before training using `pio import`, an efficient method using concurrent database connections.
 
+To enable the data hooks, the intended `pio app`, an arbitrary name & access key used to partition data in the event store, must be configured:
+
+```bash
+heroku config:set \
+  PIO_EVENTSERVER_APP_NAME=heroku-app \
+  PIO_EVENTSERVER_ACCESS_KEY=$RANDOM-$RANDOM-$RANDOM-$RANDOM-$RANDOM-$RANDOM
+```
+
 🔍 See the [Data Flow docs](DATA.md) for how to leverage the built-in import & sync workflow.
 
 ### Deploy to Heroku
 
 ```bash
+# Make sure the database is ready:
+heroku addons:wait
+
+# Then, commit & deploy:
 git add .
 git commit -m "Initial PIO engine"
 git push heroku master
 
-# Follow the logs to see training 
-# and then start-up of the engine.
-#
+# Follow the logs to see start-up of the engine.
 heroku logs -t --app $ENGINE_NAME
 ```
 
@@ -208,7 +178,7 @@ Once deployed, scale up the processes and config Spark to avoid memory issues. T
 
 ```bash
 heroku ps:scale \
-  web=1:Performance-M \
+  web=1:Standard-2X \
   release=0:Performance-L \
   train=0:Performance-L
 ```
@@ -229,7 +199,7 @@ When the release (`pio train`) fails due to memory constraints or other transien
 ```bash
 heroku run train
 
-# You may need to revive the app from "crashed" state.
+# Restart the app to pickup the new model:
 heroku restart
 ```
 
@@ -280,36 +250,116 @@ $ cat best.json
 ♻️ Paste into your local `engine.json`, commit, & deploy.
 
 
+## Eventserver
+
+Basic deployment to Heroku does not include PredictionIO's eventserver REST API. This should not be confused with **event storage** which is always configured for Heroku Postgres in `pio-env.sh`.
+
+**Eventserver only needs to be deployed if the engine will ingest events from other systems via the `events.json` REST API.** The buildpack's [Data Flow](DATA.md) features do not require Eventserver.
+
+**Whenever an eventserver is required, each engine should run its own eventserver.** It's *possible* to share event storage between engines only if they share the same storage backends and configuration, but we do not advise this practice on Heroku. *This is a change from the previous advice given here.*
+
+### Deploy the eventserver
+
+We'll deploy an eventserver from the same source code repo as the engine. This ensures the same dependencies and configuration are used in the eventserver:
+
+```bash
+# First, change to the engine's working directory:
+cd ~/my-engine
+
+# Capture your engine's Heroku app name, and a name for the new eventserver:
+export ENGINE_NAME=my-engine
+export EVENTSERVER_NAME=my-new-engine-eventserver
+
+# Create the Heroku app:
+heroku create $EVENTSERVER_NAME
+heroku buildpacks:set https://github.com/heroku/predictionio-buildpack --app $EVENTSERVER_NAME
+heroku config:set PIO_RUN_AS_EVENTSERVER=true --app $EVENTSERVER_NAME
+
+# Add this new app as a second git remote in the engine's repo:
+heroku git:remote --app $EVENTSERVER_NAME --remote heroku-eventserver
+
+# Share config & add-ons between the engine & eventserver:
+
+heroku addons:info heroku-postgresql --app $ENGINE_NAME
+# Look for the add-on ID. It looks like `postgresql-shape-00000`.
+# Then, attach that as `ADDON_ID`:
+heroku addons:attach $ADDON_ID --app $EVENTSERVER_NAME
+
+# If Elasticsearch is used:
+heroku config:get PIO_ELASTICSEARCH_URL --app $ENGINE_NAME
+# Then, set that value as `ADDON_URL` on the eventserver.
+heroku config:set PIO_ELASTICSEARCH_URL=$ADDON_URL --app $EVENTSERVER_NAME
+
+# Tell the engine how to locate the eventserver REST API.
+heroku config:set PIO_EVENTSERVER_HOSTNAME=$EVENTSERVER_NAME.herokuapp.com --app $ENGINE_NAME
+
+# Finally, deploy!
+git push heroku-eventserver master
+```
+
+Note that some add-ons, such as Bonsai Elasticsearch, do not officially support attaching to multiple apps. In these cases, their config var values must be manually copied & maintained between the engine to the eventserver.
+
 ## Configuration
+
+### Config files
+
+The config templates in [`config/`](config/) may be copied into the engine at `config/` and customized specifically for the engine. These include:
+
+* `pio-env.sh` for PredictionIO
+* `core-site.xml.erb` for Hadoop
+* `spark-defaults.conf.erb` for Spark
 
 ### Environment variables
 
-Engine deployments honor the following config vars:
+Engine deployments honor the following config vars.
 
+#### Build configuration
+
+Changes to these require a new deployment to take effect.
+
+* `PIO_MAVEN_REPO`
+  * add a Maven repository URL to search when installing deps from engine's `build.sbt`
+  * useful for testing pre-release packages
+* `PIO_RUN_AS_EVENTSERVER`
+  * set `PIO_RUN_AS_EVENTSERVER=true` to run `pio eventserver` as the web process
+  * when `true`, the engine is built, but its release-phase training will not be performed
+* `PIO_VERBOSE`
+  * set `PIO_VERBOSE=true` for detailed build logs
+
+#### Storage configuration
+
+* `AWS_REGION`
+  * when connecting to S3 in region other than US, the region name must be specified to enable signature v4.
 * `DATABASE_URL` & `PIO_POSTGRES_OPTIONAL_SSL`
   * automatically set by [Heroku PostgreSQL](https://elements.heroku.com/addons/heroku-postgresql)
   * defaults to `postgres://pio:pio@locahost:5432/pio`
   * when testing locally, set `PIO_POSTGRES_OPTIONAL_SSL=true` to avoid **The server does not support SSL** errors
-* `PIO_VERBOSE`
-  * set `PIO_VERBOSE=true` for detailed build logs
-* `PIO_MAVEN_REPO`
-  * add a Maven repository URL to search when installing deps from engine's `build.sbt`
-  * useful for testing pre-release packages
-* `PREDICTIONIO_DIST_URL`
-  * defaults to a PredictionIO distribution version based on `pio.version.min` in **template.json**
-  * use a custom distribution by setting its fetch URL:
+* `PIO_ELASTICSEARCH_URL`
+  * when set, activates [Elasticsearch](https://www.elastic.co/products/elasticsearch) as the [metadata store](http://predictionio.incubator.apache.org/system/anotherdatastore/)
+  * Elasticsearch version 5.x is supported
+  * use an [add-on](https://elements.heroku.com/search/addons?q=elasticsearch):
 
     ```bash
-    heroku config:set PREDICTIONIO_DIST_URL=https://marsikai.s3.amazonaws.com/PredictionIO-0.10.0-incubating.tar.gz
+    heroku addons:create bonsai --version 5.1 --as PIO_ELASTICSEARCH
     ```
-* `PIO_OPTS`
-  * options passed as `pio $opts`
-  * see: [`pio` command reference](https://predictionio.incubator.apache.org/cli/)
-  * example:
+* `PIO_S3_BUCKET_NAME`, `PIO_S3_AWS_ACCESS_KEY_ID`, & `PIO_S3_AWS_SECRET_ACCESS_KEY`
+  * configures a bucket to enable filesystem access
 
-    ```bash
-    heroku config:set PIO_OPTS='--variant best.json'
-    ```
+#### Release configuration
+
+* `PIO_EVENTSERVER_APP_NAME` & `PIO_EVENTSERVER_ACCESS_KEY`
+  * used in `DataSource.scala` to access the engine's data
+  * used to create the eventserver `pio app` automatically during [import of `initial-events.json`](DATA.md#initial-events-json)
+  * may be manually setup by running `pio app new $PIO_APP_NAME`
+* `PIO_PURGE_EVENTS_ON_SYNC`
+  * set `PIO_PURGE_EVENTS_ON_SYNC=true` to delete all existing events before each data import
+* `PIO_TRAIN_ON_RELEASE`
+  * set `false` to disable automatic training
+  * subsequent deploys may crash a deployed engine until it's retrained
+  * use [manual training](#manual-training)
+
+#### Spark configuration
+
 * `PIO_SPARK_OPTS` & `PIO_TRAIN_SPARK_OPTS`
   * **deploy** & **training** options passed through to `spark-submit $opts`
   * see: [`spark-submit` reference](http://spark.apache.org/docs/1.6.1/submitting-applications.html)
@@ -339,30 +389,21 @@ Engine deployments honor the following config vars:
     # Good example; do this:
     PIO_SPARK_OPTS="--driver-java-options '-Dcom.amazonaws.services.s3.enableV4'"
     ```
+* [`config/spark-defaults.conf.erb`](config/spark-defaults.conf.erb) may be copied into the engine and customized specifically for that engine.
+
+#### Runtime configuration
 * `PIO_ENABLE_FEEDBACK`
   * set `PIO_ENABLE_FEEDBACK=true` to enable feedback loop; auto-generation of historical prediction events for analysis of engine performance
   * requires the `PIO_EVENTSERVER_*` vars to be configured
 * `PIO_EVENTSERVER_HOSTNAME` & `PIO_EVENTSERVER_PORT`
   * `$EVENTSERVER_NAME.herokuapp.com` & `443` (default) for Heroku apps' HTTPS interface
-* `PIO_EVENTSERVER_APP_NAME` & `PIO_EVENTSERVER_ACCESS_KEY`
-  * may be generated by running `pio app new $PIO_APP_NAME` on the eventserver
-* `PIO_PURGE_EVENTS_ON_SYNC`
-  * set `PIO_PURGE_EVENTS_ON_SYNC=true` to delete all existing events before each data import
-* `PIO_TRAIN_ON_RELEASE`
-  * set `false` to disable automatic training
-  * subsequent deploys may crash a deployed engine until it's retrained
-  * use [manual training](#manual-training)
-* `PIO_S3_BUCKET_NAME`, `PIO_S3_AWS_ACCESS_KEY_ID`, & `PIO_S3_AWS_SECRET_ACCESS_KEY`
-  * configures a bucket to enable filesystem access
-* `AWS_REGION`
-  * when connecting to S3 in region other than US, the region name must be specified to enable signature v4.
-* `PIO_ELASTICSEARCH_URL`
-  * when set, activates [Elasticsearch](https://www.elastic.co/products/elasticsearch) as the [metadata store](http://predictionio.incubator.apache.org/system/anotherdatastore/)
-  * Elasticsearch version 5.x is supported
-  * use an [add-on](https://elements.heroku.com/search/addons?q=elasticsearch):
+* `PIO_OPTS`
+  * options passed as `pio $opts`
+  * see: [`pio` command reference](https://predictionio.incubator.apache.org/cli/)
+  * example:
 
     ```bash
-    heroku addons:create bonsai --version 5.1 --as PIO_ELASTICSEARCH
+    heroku config:set PIO_OPTS='--variant best.json'
     ```
 
 ### `pio-env.sh` and other config files
