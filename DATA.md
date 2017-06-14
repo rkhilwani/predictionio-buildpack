@@ -96,7 +96,7 @@ $ pio import --appid X --input data/pio-engine/sync-events.json
 
 ## REST API
 
-PredictionIO includes the **eventserver**: an [HTTP/JSON interface](https://predictionio.incubator.apache.org/datacollection/eventapi/) that allows other systems to push events into the data store. Once the Eventserver is deployed to Heroku, its web process serves this API.
+PredictionIO includes the **eventserver**: an [HTTP/JSON interface](https://predictionio.incubator.apache.org/datacollection/eventapi/) that allows other systems to push events into the data store. Once an [eventserver is deployed to Heroku](](https://github.com/heroku/predictionio-buildpack/blob/master/CUSTOM.md#user-content-eventserver)), its web process serves this API.
 
 ### Running Eventserver
 
@@ -104,4 +104,4 @@ PredictionIO includes the **eventserver**: an [HTTP/JSON interface](https://pred
 pio eventserver
 ```
 
-Once you have PredictionIO installed, this is all it takes to run the Eventserver. It's built-in to the `pio` CLI. The Heroku PredictionIO buildpack will run an Eventserver when [deployed sans engine](https://github.com/heroku/predictionio-buildpack/blob/master/CUSTOM.md#user-content-eventserver).
+Once you have PredictionIO installed, this is all it takes to run the Eventserver. It's built-in to the `pio` CLI.
