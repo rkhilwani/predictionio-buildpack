@@ -123,7 +123,7 @@ $PIO_BUILDPACK_DIR/bin/local/setup
     PIO_ELASTICSEARCH_URL=http://127.0.0.1:9200
     ```
     
-1. [Refresh the setup](#refreshing-the-setup)
+1. [Refresh the setup](#user-content-refreshing-the-setup)
 1. If the [Authenticated Elasticsearch patch](https://github.com/apache/incubator-predictionio/pull/372) is required (e.g. for the [Universal Recommender](https://github.com/heroku/predictionio-engine-ur)), then revise:
 
     * **build.sbt**

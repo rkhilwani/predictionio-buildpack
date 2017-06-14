@@ -2,7 +2,7 @@
 
 Enables data scientists and developers to deploy custom machine learning services created with [PredictionIO](https://predictionio.incubator.apache.org).
 
-This buildpack is part of an exploration into utilizing the [Heroku developer experience](https://www.heroku.com/dx) to simplify data science operations. When considering this proof-of-concept technology, please note its [current limitations](#limitations). We'd love to hear from you. [Open issues on this repo](https://github.com/heroku/predictionio-buildpack/issues) with feedback and questions.
+This buildpack is part of an exploration into utilizing the [Heroku developer experience](https://www.heroku.com/dx) to simplify data science operations. When considering this proof-of-concept technology, please note its [current limitations](#user-content-limitations). We'd love to hear from you. [Open issues on this repo](https://github.com/heroku/predictionio-buildpack/issues) with feedback and questions.
 
 ## Engines
 
@@ -41,7 +41,7 @@ The events data can be stored in:
 
 This buildpack automatically trains the predictive model during [release phase](https://devcenter.heroku.com/articles/release-phase), which runs in a [one-off dyno](https://devcenter.heroku.com/articles/dynos). That dyno's memory capacity is a limiting factor at this time. Only [Performance dynos](https://www.heroku.com/pricing) with 2.5GB or 14GB RAM provide reasonable utility.
 
-This limitation can be worked-around by pointing the engine at an existing Spark cluster. See: [customizing environment variables, `PIO_SPARK_OPTS` & `PIO_TRAIN_SPARK_OPTS`](CUSTOM.md#environment-variables).
+This limitation can be worked-around by pointing the engine at an existing Spark cluster. See: [customizing environment variables, `PIO_SPARK_OPTS` & `PIO_TRAIN_SPARK_OPTS`](CUSTOM.md#user-content-spark-configuration).
 
 ### Private Network
 
@@ -49,7 +49,7 @@ This is not a limitation for PredictionIO itself, but for the underlying Spark s
 
 To operate in the Common Runtime this buildpack executes Spark as a sub-process (i.e. [`--master local`](https://spark.apache.org/docs/1.6.3/#running-the-examples-and-shell)) within [one-off and web dynos](https://devcenter.heroku.com/articles/dynos).
 
-This buildpack also supports executing jobs on an existing Spark cluster. See: [customizing environment variables, `PIO_SPARK_OPTS` & `PIO_TRAIN_SPARK_OPTS`](CUSTOM.md#environment-variables).
+This buildpack also supports executing jobs on an existing Spark cluster. See: [customizing environment variables, `PIO_SPARK_OPTS` & `PIO_TRAIN_SPARK_OPTS`](CUSTOM.md#user-content-spark-configuration).
 
 ### Additional Service Dependencies
 
@@ -69,7 +69,7 @@ PredictionIO 0.10.0-incubating requires a database connection during the build p
 
 PredictionIO [engine templates](https://predictionio.incubator.apache.org/gallery/template-gallery/) typically have some configuration values stored alongside the source code in `engine.json`. Some of these values may vary between deployments, such as in a [pipeline](https://devcenter.heroku.com/articles/pipelines), where the same slug will be used to connect to different databases for Review Apps, Staging, & Production.
 
-Heroku [config vars](https://devcenter.heroku.com/articles/config-vars) solve many of the problems associated with these committed configuration files. When using a template or implementing a custom engine, the developer may migrate the engine to read the [environment variables](https://github.com/heroku/predictionio-buildpack/blob/master/CUSTOM.md#environment-variables) instead of the default file-based config, e.g. `sys.env("PIO_EVENTSERVER_APP_NAME")`.
+Heroku [config vars](https://devcenter.heroku.com/articles/config-vars) solve many of the problems associated with these committed configuration files. When using a template or implementing a custom engine, the developer may migrate the engine to read the [environment variables](https://github.com/heroku/predictionio-buildpack/blob/master/CUSTOM.md#user-content-environment-variables) instead of the default file-based config, e.g. `sys.env("PIO_EVENTSERVER_APP_NAME")`.
 
 ## Development & Testing
 
@@ -77,4 +77,4 @@ Heroku [config vars](https://devcenter.heroku.com/articles/config-vars) solve ma
 
 🔍 See the [Data Flow docs](DATA.md) for how to leverage the built-in import & sync workflow.
 
-🤓 Info for [testing](CUSTOM.md#testing) this buildpack & individual engines.
+🤓 Info for [testing](CUSTOM.md#user-content-testing) this buildpack & individual engines.

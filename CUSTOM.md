@@ -14,41 +14,46 @@
 
 Please, follow the steps in the order documented.
 
-* [Engine](#engine)
-  1. [Create the app](#create-an-engine)
-     * [Provision the database](#provision-the-database)
-     * [Optional persistent filesystem](#optional-persistent-filesystem)
-  1. [Update source configs](#update-source-configs)
-     1. [`template.json`](#update-template-json)
-     1. [`build.sbt`](#update-build-sbt)
-     1. [`engine.json`](#update-engine-json)
-  1. [Import data](#import-data)
-     * [Built-in Data Hooks](#built-in-data-hooks)
-  1. [Deploy to Heroku](#deploy-to-heroku)
-     * [Scale-up](#scale-up)
-     * [Retry release](#retry-release)
-* [Training](#training)
-  * [Automatic training](#automatic-training)
-  * [Manual training](#manual-training)
-* [Evaluation](#evaluation)
-  1. [Changes required for evaluation](#changes-required-for-evaluation)
-  1. [Perform evaluation](#perform-evaluation)
-  1. [Re-deploy best parameters](#re-deploy-best-parameters)
-* [Eventserver](#eventserver)
-  1. [Deploy the eventserver](#deploy-the-eventserver)
-* [Configuration](#configuration)
-  * [Environment variables](#environment-variables)
-  * [`pio-env.sh` and other config files](#pio-env-sh-and-other-config-files)
-* [Local development](#local-development)
-  * [`pio-shell`](#pio-shell)
-* [Testing](#testing)
+* [Engine](#user-content-engine)
+  1. [Create the app](#user-content-create-an-engine)
+     * [Provision the database](#user-content-provision-the-database)
+     * [Persistent filesystem](#user-content-optional-persistent-filesystem) (optional)
+  1. [Update source configs](#user-content-update-source-configs)
+     1. [`template.json`](#user-content-update-template-json)
+     1. [`build.sbt`](#user-content-update-build-sbt)
+     1. [`engine.json`](#user-content-update-engine-json)
+  1. [Import data](#user-content-import-data)
+     * [Built-in Data Hooks](#user-content-built-in-data-hooks)
+  1. [Deploy to Heroku](#user-content-deploy-to-heroku)
+     * [Scale-up](#user-content-scale-up)
+     * [Retry release](#user-content-retry-release)
+* [Training](#user-content-training)
+  * [Automatic training](#user-content-automatic-training)
+  * [Manual training](#user-content-manual-training)
+* [Evaluation](#user-content-evaluation) (optional)
+  1. [Changes required for evaluation](#user-content-changes-required-for-evaluation)
+  1. [Perform evaluation](#user-content-perform-evaluation)
+  1. [Re-deploy best parameters](#user-content-re-deploy-best-parameters)
+* [Eventserver](#user-content-eventserver) (optional)
+  1. [Deploy the eventserver](#user-content-deploy-the-eventserver)
+* [Configuration](#user-content-configuration)
+  * [Config files; `pio-env.sh`](#user-content-config-files)
+  * [Environment variables](#user-content-environment-variables)
+    * [Build configuration](#user-content-build-configuration)
+    * [Storage configuration](#user-content-storage-configuration)
+    * [Release configuration](#user-content-release-configuration)
+    * [Spark configuration](#user-content-spark-configuration)
+    * [Runtime configuration](#user-content-runtime-configuration)
+* [Local development](#user-content-local-development)
+  * [`pio-shell`](#user-content-pio-shell)
+* [Testing](#user-content-testing)
 
 
 ## Engine
 
 🏷 This buildpack should be used with engine templates for **PredictionIO 0.11**.
 
-🔋 Engines already optimized for Heroku are listed in the main [builpack README](README.md#engines).
+🔋 Engines already optimized for Heroku are listed in the main [builpack README](README.md#user-content-engines).
 
 📐 Starting-points may be found in the [template gallery](https://predictionio.incubator.apache.org/gallery/template-gallery/). Download the `.tar.gz` from Github and open/expand it on your local computer.
 
@@ -83,7 +88,7 @@ To enable, either:
   ```bash
   heroku addons:create bucketeer --as PIO_S3
   ```
-* bring your own [s3 bucket](https://aws.amazon.com/s3/) by manually setting the [config vars](#environment-variables)
+* bring your own [s3 bucket](https://aws.amazon.com/s3/) by manually setting the [config vars](#user-content-environment-variables)
   * `PIO_S3_BUCKET_NAME`
   * `PIO_S3_AWS_ACCESS_KEY_ID`
   * `PIO_S3_AWS_SECRET_ACCESS_KEY`
@@ -121,7 +126,7 @@ libraryDependencies ++= Seq(
 
 #### `engine.json`
 
-Update so the `appName` parameter matches the [value set for `PIO_EVENTSERVER_APP_NAME`](#configure-the-heroku-app-to-use-the-eventserver).
+Update so the `appName` parameter matches the value set for `PIO_EVENTSERVER_APP_NAME`.
 
 ```json
   "datasource": {
@@ -137,7 +142,7 @@ Update so the `appName` parameter matches the [value set for `PIO_EVENTSERVER_AP
 
 🚨 **Mandatory: Data is required.** The first time an engine is deployed, it requires data for training.
 
-⚠️  If `data/initial-events.json` already exists in the engine, then skip to [Deploy to Heroku](#deploy-to-heroku). This data will automatically be imported into the eventserver before training.
+⚠️  If `data/initial-events.json` already exists in the engine, then skip to [Deploy to Heroku](#user-content-deploy-to-heroku). This data will automatically be imported into the eventserver before training.
 
 Many community-contributed engine templates provide a Python `data/import_events.py` script which may be run manually from a local machine to load data via the Eventserver's REST API. While popular for getting an example running, this method is not optimum for Heroku deployment workflow, because it requires a Python installation (nothing else in PredictionIO uses Python), it limits import performance through the Eventserver web process (extra complexity of running & scaling that process), and it is not transactional (individual REST failures will not fail the process).
 
@@ -170,11 +175,11 @@ git push heroku master
 heroku logs -t --app $ENGINE_NAME
 ```
 
-⚠️ **Initial deploy will probably fail due to memory constraints.** To fix, [scale up](#scale-up) and [retry the release](#retry-release).
+⚠️ **Initial deploy will probably fail due to memory constraints.** To fix, [scale up](#user-content-scale-up) and [retry the release](#user-content-retry-release).
 
 #### Scale up
 
-Once deployed, scale up the processes and config Spark to avoid memory issues. These are paid, [professional dyno types](https://devcenter.heroku.com/articles/dyno-types#available-dyno-types):
+Once deployed, scale up the processes to avoid memory issues. These are paid, [professional dyno types](https://devcenter.heroku.com/articles/dyno-types#available-dyno-types):
 
 ```bash
 heroku ps:scale \
@@ -303,7 +308,7 @@ Note that some add-ons, such as Bonsai Elasticsearch, do not officially support 
 
 ### Config files
 
-The config templates in [`config/`](config/) may be copied into the engine at `config/` and customized specifically for the engine. These include:
+The buildpack comes with [`config/`](config/) ERB templates that are rendered using the current [environment variables](#user-content-environment-variables) when the app is launched. Any one of these may be customized by creating a `config/` directory in your engine and copying over the template from this buildpack. Use caution when making modifications, as these configs are preset to work on Heroku. These include:
 
 * `pio-env.sh` for PredictionIO
 * `core-site.xml.erb` for Hadoop
@@ -349,20 +354,20 @@ Changes to these require a new deployment to take effect.
 
 * `PIO_EVENTSERVER_APP_NAME` & `PIO_EVENTSERVER_ACCESS_KEY`
   * used in `DataSource.scala` to access the engine's data
-  * used to create the eventserver `pio app` automatically during [import of `initial-events.json`](DATA.md#initial-events-json)
+  * used to create the eventserver `pio app` automatically during [import of `initial-events.json`](DATA.md#user-content-initial-events-json)
   * may be manually setup by running `pio app new $PIO_APP_NAME`
 * `PIO_PURGE_EVENTS_ON_SYNC`
   * set `PIO_PURGE_EVENTS_ON_SYNC=true` to delete all existing events before each data import
 * `PIO_TRAIN_ON_RELEASE`
   * set `false` to disable automatic training
   * subsequent deploys may crash a deployed engine until it's retrained
-  * use [manual training](#manual-training)
+  * use [manual training](#user-content-manual-training)
 
 #### Spark configuration
 
 * `PIO_SPARK_OPTS` & `PIO_TRAIN_SPARK_OPTS`
   * **deploy** & **training** options passed through to `spark-submit $opts`
-  * see: [`spark-submit` reference](http://spark.apache.org/docs/1.6.1/submitting-applications.html)
+  * see: [`spark-submit` reference](http://spark.apache.org/docs/2.1.0/submitting-applications.html)
   * example, overriding the automatic (fit-to-dyno) Spark memory settings:
 
     ```bash
@@ -405,10 +410,6 @@ Changes to these require a new deployment to take effect.
     ```bash
     heroku config:set PIO_OPTS='--variant best.json'
     ```
-
-### `pio-env.sh` and other config files
-
-The buildpack comes with [`config/`](config/) ERB templates that are rendered using the current [environment variables](#environment-variables) when the app is launched. Any one of these may be customized by creating a `config/` directory in your engine and copying over the template from this buildpack. Use caution when making modifications, as these configs are preset to work on Heroku.
 
 ## Local development
 

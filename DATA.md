@@ -4,7 +4,7 @@ Training a PredictionIO engine requires data. The right data. Where does this da
 
 ## Engine integration
 
-Mandatory [environment variables](CUSTOM.md#environment-variables) must be set before deployment. These are used to create the eventserver app when the engine is first deployed, and then access it throughout the lifecycle of the engine:
+Mandatory [environment variables](CUSTOM.md#user-content-environment-variables) must be set before deployment. These are used to create the eventserver app when the engine is first deployed, and then access it throughout the lifecycle of the engine:
 
 * `PIO_EVENTSERVER_APP_NAME`: name for the dataset
 * `PIO_EVENTSERVER_ACCESS_KEY`: a unique, random secret
@@ -104,4 +104,4 @@ PredictionIO includes the **eventserver**: an [HTTP/JSON interface](https://pred
 pio eventserver
 ```
 
-Once you have PredictionIO installed, this is all it takes to run the Eventserver. It's built-in to the `pio` CLI. The Heroku PredictionIO buildpack will run an Eventserver when [deployed sans engine](https://github.com/heroku/predictionio-buildpack/blob/master/CUSTOM.md#eventserver).
+Once you have PredictionIO installed, this is all it takes to run the Eventserver. It's built-in to the `pio` CLI. The Heroku PredictionIO buildpack will run an Eventserver when [deployed sans engine](https://github.com/heroku/predictionio-buildpack/blob/master/CUSTOM.md#user-content-eventserver).
