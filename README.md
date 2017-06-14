@@ -15,7 +15,8 @@ Supports engines created for PredictionIO version:
 
 Getting started with an engine:
 
-* [Classification demo](https://github.com/heroku/predictionio-engine-classification) presented at [Dreamforce 2016 "Exploring Machine Learning On Heroku"](https://www.salesforce.com/video/297129/)
+* [Classification engine](https://github.com/heroku/predictionio-engine-classification) presented at [Dreamforce 2016 "Exploring Machine Learning On Heroku"](https://www.salesforce.com/video/297129/)
+* [Universal Recommender engine](https://github.com/heroku/predictionio-engine-ur)
 * [Template Gallery](https://predictionio.incubator.apache.org/gallery/template-gallery/) offers starting-points for many use-cases.
 
 🐸 [How to deploy an engine](CUSTOM.md)
