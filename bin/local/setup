@@ -10,6 +10,21 @@ BUILD_DIR="$(pwd)"
 # The buildpack dir is two directories up from this script.
 BP_DIR="$(cd $(dirname ${0:-}); cd ../..; pwd)"
 
+# Don't let a global `pio` command corrupt things
+which_pio=`which pio`
+if [ "$which_pio" ]
+  then
+  echo
+  echo 'Cannot continue, because the `pio` command is already in the `PATH`.'
+  echo 'This local dev setup provides a unique `bin/pio` for each engine.'
+  echo
+  echo "\`pio\` command already exists at \`$which_pio\`"
+  echo
+  echo 'Please remove PredictionIO from the PATH. It may be set in'
+  echo '  ~/.profile, ~/.bash_profile, or ~/.bashrc'
+  exit 1
+fi
+
 echo
 echo "Installing to $BUILD_DIR/PredictionIO-dist ⚙️"
 echo

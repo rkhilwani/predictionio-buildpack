@@ -29,6 +29,10 @@ This workflow augments the Heroku/Linux-based deployment, and so only supports s
 
 ## How-to
 
+### 0. Remove previously installed `pio`
+
+If you previously used PredictionIO, then you might have added the `pio` command to the `PATH` of the shell. Setup will abort if `pio` already exists. Please remove any existing PredictionIO entries from the `PATH`. It may be set in  `~/.profile`, `~/.bash_profile`, or `~/.bashrc`.
+
 ### 1. Install Dependencies
 
 ⚠️ *This step is only required once for your computer.*
