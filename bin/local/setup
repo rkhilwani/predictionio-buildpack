@@ -43,9 +43,12 @@ $BP_DIR/bin/common/setup-runtime "$BUILD_DIR" "$BP_DIR"
 mkdir -p $BUILD_DIR/bin
 # Set this directory path for the ERB template.
 export PIO_BUILDPACK_DIR="$BP_DIR"
-echo "-----> Installing \`bin/pio\`"
+echo "-----> Installing \`bin/dotenv\`"
 echo "       with environment ${PIO_BUILDPACK_DIR}/bin/local/env"
-erb $BP_DIR/bin/local/pio.erb > $BUILD_DIR/bin/pio
+erb $BP_DIR/bin/local/dotenv.erb > $BUILD_DIR/bin/dotenv
+chmod +x $BUILD_DIR/bin/dotenv
+echo "-----> Installing \`bin/pio\` local dev command"
+cp $BP_DIR/bin/local/pio $BUILD_DIR/bin/pio
 chmod +x $BUILD_DIR/bin/pio
 
 echo
@@ -59,4 +62,6 @@ echo 'PredictionIO is setup 🐸'
 echo 'Use it with:'
 echo
 echo '  bin/pio'
+echo
+echo 'Any script or shell may load the env with `source bin/dotenv`'
 echo
