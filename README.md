@@ -31,8 +31,8 @@ The events data can be stored in:
 
 * **PredictionIO event storage** backed by Heroku PostgreSQL
   * compatible with this buildpack's [built-in Data Flow features](DATA.md) providing initial data load & sync automation
-  * compatible with most engine templates; required by some
-  * supports RESTful ingestion & querying via PredictionIO's built-in Eventserver
+  * compatible with most engine templates; required by some (e.g. [UR](https://github.com/heroku/predictionio-engine-ur))
+  * supports RESTful ingestion & querying via PredictionIO's built-in [Eventserver](CUSTOM.md#user-content-eventserver)
 * **custom data store** such as Heroku Connect with PostgreSQL or RDD/DataFrames stored in HDFS
   * requires a highly technical, custom implementation of `DataSource.scala`
 
