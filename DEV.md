@@ -88,6 +88,7 @@ echo 'PIO_POSTGRES_OPTIONAL_SSL=true'     >> .env
 # Ignore the local dev artifacts
 echo                      >> .gitignore
 echo 'bin/pio'            >> .gitignore
+echo 'bin/dotenv'         >> .gitignore
 echo '.env'               >> .gitignore
 echo 'PredictionIO-dist/' >> .gitignore
 echo 'repo/'              >> .gitignore
