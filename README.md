@@ -13,13 +13,17 @@ Supports engines created for PredictionIO version:
   * **0.10.0-incubating**
     * with Scala 2.10, Spark 1.6, & Hadoop 2.6
 
-Getting started with an engine:
+Get started with an engine:
 
 * [Universal Recommender engine](https://github.com/heroku/predictionio-engine-ur)
-* [Classification engine](https://github.com/heroku/predictionio-engine-classification) presented at [Dreamforce 2016 "Exploring Machine Learning On Heroku"](https://www.salesforce.com/video/297129/)
-* [Template Gallery](https://predictionio.incubator.apache.org/gallery/template-gallery/) offers starting-points for many use-cases.
+  * presented at [TrailheaDX 2017](https://www.youtube.com/watch?v=MO0Bmty9fmc)
+* [Classification engine](https://github.com/heroku/predictionio-engine-classification)
+  * presented at [TrailheaDX 2017](https://www.youtube.com/watch?v=MO0Bmty9fmc) & [Dreamforce 2016](https://www.salesforce.com/video/297129/)
+* [Template Gallery](https://predictionio.incubator.apache.org/gallery/template-gallery/)
+  * starting-points for many use-cases
+  * follow [custom engine docs](CUSTOM.md) to use with this buildpack
 
-🐸 [How to deploy an engine](CUSTOM.md)
+🐸 **[How to deploy an engine](CUSTOM.md)**
 
 ## Architecture
 
