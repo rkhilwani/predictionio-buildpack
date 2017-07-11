@@ -77,15 +77,13 @@ then
   if [[ $requires_pio_version =~ ^0\.10 ]]
     then
     PIO_VERSION=0.10.0-incubating
+    PIO_BUILD_SPARK_VERSION=1.6.3
+    PIO_BUILD_HADOOP_VERSION=2.6
   elif [[ $requires_pio_version =~ ^0\.11\.0-SNAPSHOT ]]
     then
-    PIO_VERSION=0.11.0-SNAPSHOT-esclient-auth-v07
-    PIO_BUILD_SPARK_VERSION=2.1.0
-    PIO_BUILD_HADOOP_VERSION=2.7
+    PIO_VERSION=0.11.0-SNAPSHOT-esclient-auth-v08
   else
     PIO_VERSION=0.11.0-incubating
-    PIO_BUILD_SPARK_VERSION=2.1.0
-    PIO_BUILD_HADOOP_VERSION=2.7
   fi
   echo "Using Apache PredictionIO ${PIO_VERSION}" | indent
 else
@@ -96,7 +94,7 @@ else
 fi
 
 PIO_BUILD=PredictionIO-${PIO_VERSION}
-SPARK_VERSION="spark-${PIO_BUILD_SPARK_VERSION:-1.6.3}-bin-hadoop${PIO_BUILD_HADOOP_VERSION:-2.6}"
+SPARK_VERSION="spark-${PIO_BUILD_SPARK_VERSION:-2.1.0}-bin-hadoop${PIO_BUILD_HADOOP_VERSION:-2.7}"
 
 # PredictionIO dist tarball URL, expects `.tar.gz` 
 default_url="https://marsikai.s3.amazonaws.com/${PIO_BUILD}.tar.gz"
