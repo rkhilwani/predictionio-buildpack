@@ -81,7 +81,7 @@ then
     PIO_BUILD_HADOOP_VERSION=2.6
   elif [[ $requires_pio_version =~ ^0\.11\.0-SNAPSHOT ]]
     then
-    PIO_VERSION=0.11.0-SNAPSHOT-esclient-auth-v08
+    PIO_VERSION=0.11.0-SNAPSHOT-esclient-auth-with-batch-predict-v09
   else
     PIO_VERSION=0.11.0-incubating
   fi
