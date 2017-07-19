@@ -117,6 +117,9 @@ then
     echo "Using default Procfile for engine" | indent
     cp "${BP_DIR}/Procfile-engine" "${BUILD_DIR}/Procfile"
   fi
+  # Move `.heroku` directory up to `/app/` to be composable
+  # with other buildpacks.
+  mv $BUILD_DIR/$app_namespace/.heroku $BUILD_DIR/ || true
 
   echo "Making Procfile executables available in /app/bin/" | indent
   mkdir -p $BUILD_DIR/bin
