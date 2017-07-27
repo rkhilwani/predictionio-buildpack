@@ -70,21 +70,7 @@ if [ -f "${BUILD_DIR}/engine.json" ]
 then
   topic "PredictionIO engine"
 
-  # Build with dyno runtime-compatible prefix.
-  # The PATH set in .profile.d/pio-env.sh must match.
-  # (`pio build` ends up capturing its absolute build path, so it needs
-  # to align with the actual runtime.)
-  app_namespace="pio-engine"
-  app_prefix="/app/${app_namespace}"
-  echo "Building at $app_prefix" | indent
-  STAGE_THE_BUILD=$CACHE_DIR/app-prefix-stage
-  mkdir -p $STAGE_THE_BUILD
-  mv $BUILD_DIR/* $STAGE_THE_BUILD/
-  mkdir -p $app_prefix
-  mv $STAGE_THE_BUILD/* $app_prefix/
-  rm -rf $STAGE_THE_BUILD
-  cd $app_prefix
-
+  cd $BUILD_DIR
   if [ "${PIO_VERBOSE:-}" = "true" ]
   then
     $PIO_DIST_NAME/bin/pio build --verbose | indent
@@ -93,46 +79,26 @@ then
     $PIO_DIST_NAME/bin/pio build | indent
   fi
 
-  echo "Clean-up build artifacts" | indent
-  # Try to keep slug below 300MB limit.
+  # Try to keep slug below 500MB limit.
   # This is based on profiling with
   # `du -a "${BUILD_DIR}" | sort -n -r | head -n 50`
   # and removing big objects that seem unnecessary.
   rm -rf "target/streams" || true
 
-  echo "Making engine available in runtime at /app/pio-engine/" | indent
-  # After PIO build at the runtime prefix, move the engine into the slug
-  mv $app_prefix $BUILD_DIR || true
-  # Move the Procfile(s) back to the top-level app directory or use default for engines
-  # (`bin/release` default_process_types have no effect since this is never the last buildpack)
-  if [ "${PIO_RUN_AS_EVENTSERVER:-false}" = "true" ]
+  # Move executables for Procfile into place
+  mkdir -p $BUILD_DIR/bin
+  cp $BP_DIR/bin/engine/heroku-* $BUILD_DIR/bin/
+
+  if [ -f "${BUILD_DIR}/Procfile" ]
+  then
+    echo "Using custom Procfile" | indent
+  elif [ "${PIO_RUN_AS_EVENTSERVER:-false}" = "true" ]
   then
     echo "Using eventserver Procfile" | indent
     cp "${BP_DIR}/Procfile-eventserver" "${BUILD_DIR}/Procfile"
-  elif [ -f "${BUILD_DIR}/${app_namespace}/Procfile" ]
-  then
-    echo "Using custom Procfile" | indent
-    mv $BUILD_DIR/$app_namespace/Procfile* $BUILD_DIR
   else
     echo "Using default Procfile for engine" | indent
     cp "${BP_DIR}/Procfile-engine" "${BUILD_DIR}/Procfile"
-  fi
-  # Move `.heroku` directory up to `/app/` to be composable
-  # with other buildpacks.
-  mv $BUILD_DIR/$app_namespace/.heroku $BUILD_DIR/ || true
-
-  echo "Making Procfile executables available in /app/bin/" | indent
-  mkdir -p $BUILD_DIR/bin
-  cp $BP_DIR/bin/engine/heroku-* $BUILD_DIR/bin/
-  # This supports composition with other buildpacks which might expect 
-  # bin/ & conf/ directories to stay in app/.
-  if [ -d "$BUILD_DIR/$app_namespace/bin" ]
-    then
-    mv $BUILD_DIR/$app_namespace/bin/* $BUILD_DIR/bin/
-  fi
-  if [ -d "$BUILD_DIR/$app_namespace/conf" ]
-    then
-    mv $BUILD_DIR/$app_namespace/conf/* $BUILD_DIR/conf/
   fi
 
 # The eventserver is built directly by the Scala buildpack.

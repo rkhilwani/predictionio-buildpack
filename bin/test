@@ -10,4 +10,4 @@ if [ -f "$PIO_ENV_FILE" ]
   source $PIO_ENV_FILE
 fi
 
-cd "/app/pio-engine" && ./PredictionIO-dist/sbt/sbt test
+./PredictionIO-dist/sbt/sbt test

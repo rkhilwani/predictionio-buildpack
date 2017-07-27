@@ -27,4 +27,4 @@ then
   S3_SUPPORT_OPTS="--driver-java-options '-Dcom.amazonaws.services.s3.enableV4' --conf 'spark.executor.extraJavaOptions=-Dcom.amazonaws.services.s3.enableV4'"
 fi
 
-eval "cd pio-engine/ && pio deploy --port $PORT ${PIO_OPTS:-} ${FEEDBACK_OPTS:-} -- ${PIO_SPARK_OPTS:-} ${S3_SUPPORT_OPTS:-}"
+eval "pio deploy --port $PORT ${PIO_OPTS:-} ${FEEDBACK_OPTS:-} -- ${PIO_SPARK_OPTS:-} ${S3_SUPPORT_OPTS:-}"

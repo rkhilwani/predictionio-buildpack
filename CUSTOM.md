@@ -230,7 +230,6 @@ Next, start a console & change to the engine's directory. This uses a paid, [pro
 
 ```bash
 heroku run bash --size Performance-L
-$ cd pio-engine/
 ```
 
 Then, start the process, specifying the evaluation & engine params classes from the `Evaluation.scala` source file. For example:

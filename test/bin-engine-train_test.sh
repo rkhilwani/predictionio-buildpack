@@ -8,7 +8,7 @@ pioSpy=""
 # to assert how it is called.
 afterSetUp() {
   PATH=./:$PATH
-  pioEngineDir="$BUILD_DIR/pio-engine"
+  pioEngineDir="$BUILD_DIR"
   pioSpy="${pioEngineDir}/pio"
   mkdir -p "${pioEngineDir}"
   cat > $pioSpy <<'HEREDOC'
