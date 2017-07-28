@@ -1,14 +1,5 @@
 #!/usr/bin/env bash
 
-# Fail immediately on non-zero exit code.
-set -e
-# Fail immediately on non-zero exit code within a pipeline.
-set -o pipefail
-# Fail on undeclared variables.
-set -u
-# Debug, echo every command
-#set -x
-
 function already_has_memory_opts() {
   echo ${@:-} | grep --extended-regexp '(--executor-memory|--driver-memory)'
 }
