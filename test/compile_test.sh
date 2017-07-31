@@ -15,9 +15,9 @@ SKIP_test_compile_with_predictionio_0_10_0() {
 
   assertEquals "\`pio build\` exit code was ${RETURN} instead of 0" "0" "${RETURN}"
   assertTrue "missing Procfile" "[ -f $BUILD_DIR/Procfile ]"
-  assertTrue "missing PostgreSQL JDBC" "[ -f $BUILD_DIR/pio-engine/PredictionIO-dist/lib/postgresql_jdbc.jar ]"
-  assertTrue "missing AWS SDK" "[ -f $BUILD_DIR/pio-engine/PredictionIO-dist/lib/spark/aws-java-sdk.jar ]"
-  assertTrue "missing Hadoop-AWS" "[ -f $BUILD_DIR/pio-engine/PredictionIO-dist/lib/spark/hadoop-aws.jar ]"
+  assertTrue "missing PostgreSQL JDBC" "[ -f $BUILD_DIR/PredictionIO-dist/lib/postgresql_jdbc.jar ]"
+  assertTrue "missing AWS SDK" "[ -f $BUILD_DIR/PredictionIO-dist/lib/spark/aws-java-sdk.jar ]"
+  assertTrue "missing Hadoop-AWS" "[ -f $BUILD_DIR/PredictionIO-dist/lib/spark/hadoop-aws.jar ]"
   assertTrue "missing runtime memory config" "[ -f $BUILD_DIR/.profile.d/pio-memory.sh ]"
   assertTrue "missing runtime path config" "[ -f $BUILD_DIR/.profile.d/pio-path.sh ]"
   assertTrue "missing runtime config renderer" "[ -f $BUILD_DIR/.profile.d/pio-render-configs.sh ]"
@@ -25,12 +25,12 @@ SKIP_test_compile_with_predictionio_0_10_0() {
   assertTrue "missing train executable" "[ -f $BUILD_DIR/bin/heroku-buildpack-pio-train ]"
   assertTrue "missing release executable" "[ -f $BUILD_DIR/bin/heroku-buildpack-pio-release ]"
   assertTrue "missing data loader executable" "[ -f $BUILD_DIR/bin/heroku-buildpack-pio-load-data ]"
-  expected_output="$BUILD_DIR/pio-engine/target/scala-2.10/template-scala-parallel-classification-assembly-0.1-SNAPSHOT-deps.jar"
+  expected_output="$BUILD_DIR/target/scala-2.10/template-scala-parallel-classification-assembly-0.1-SNAPSHOT-deps.jar"
   assertTrue "missing Scala build output: $expected_output" "[ -f $expected_output ]"
 
-  echo "-----> Stage build for testing in /app/pio-engine (same as dyno runtime)"
+  echo "-----> Stage build for testing in /app (same as dyno runtime)"
   mv $BUILD_DIR/* $BUILD_DIR/.[!.]* /app/
-  cd /app/pio-engine
+  cd /app
 
   capture ./PredictionIO-dist/bin/pio status
 
@@ -60,9 +60,9 @@ SKIP_test_compile_with_predictionio_0_11_0() {
 
   assertEquals "\`pio build\` exit code was ${RETURN} instead of 0" "0" "${RETURN}"
   assertTrue "missing Procfile" "[ -f $BUILD_DIR/Procfile ]"
-  assertTrue "missing PostgreSQL JDBC" "[ -f $BUILD_DIR/pio-engine/PredictionIO-dist/lib/postgresql_jdbc.jar ]"
-  assertTrue "missing AWS SDK" "[ -f $BUILD_DIR/pio-engine/PredictionIO-dist/lib/spark/aws-java-sdk.jar ]"
-  assertTrue "missing Hadoop-AWS" "[ -f $BUILD_DIR/pio-engine/PredictionIO-dist/lib/spark/hadoop-aws.jar ]"
+  assertTrue "missing PostgreSQL JDBC" "[ -f $BUILD_DIR/PredictionIO-dist/lib/postgresql_jdbc.jar ]"
+  assertTrue "missing AWS SDK" "[ -f $BUILD_DIR/PredictionIO-dist/lib/spark/aws-java-sdk.jar ]"
+  assertTrue "missing Hadoop-AWS" "[ -f $BUILD_DIR/PredictionIO-dist/lib/spark/hadoop-aws.jar ]"
   assertTrue "missing runtime memory config" "[ -f $BUILD_DIR/.profile.d/pio-memory.sh ]"
   assertTrue "missing runtime path config" "[ -f $BUILD_DIR/.profile.d/pio-path.sh ]"
   assertTrue "missing runtime config renderer" "[ -f $BUILD_DIR/.profile.d/pio-render-configs.sh ]"
@@ -70,12 +70,12 @@ SKIP_test_compile_with_predictionio_0_11_0() {
   assertTrue "missing train executable" "[ -f $BUILD_DIR/bin/heroku-buildpack-pio-train ]"
   assertTrue "missing release executable" "[ -f $BUILD_DIR/bin/heroku-buildpack-pio-release ]"
   assertTrue "missing data loader executable" "[ -f $BUILD_DIR/bin/heroku-buildpack-pio-load-data ]"
-  expected_output="$BUILD_DIR/pio-engine/target/scala-2.11/template-scala-parallel-classification-assembly-0.1-SNAPSHOT-deps.jar"
+  expected_output="$BUILD_DIR/target/scala-2.11/template-scala-parallel-classification-assembly-0.1-SNAPSHOT-deps.jar"
   assertTrue "missing Scala build output: $expected_output" "[ -f $expected_output ]"
 
-  echo "-----> Stage build for testing in /app/pio-engine (same as dyno runtime)"
+  echo "-----> Stage build for testing in /app (same as dyno runtime)"
   mv $BUILD_DIR/* $BUILD_DIR/.[!.]* /app/
-  cd /app/pio-engine
+  cd /app
 
   capture ./PredictionIO-dist/bin/pio status
 

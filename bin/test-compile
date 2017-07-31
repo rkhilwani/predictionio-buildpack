@@ -13,4 +13,4 @@ fi
 eval "$(dirname ${0:-})/compile $1 $2 $3"
 
 echo "       Removing 'pio_env.sh' to override with test environment"
-rm "$1/pio-engine/PredictionIO-dist/conf/pio-env.sh"
+rm "$1/PredictionIO-dist/conf/pio-env.sh"

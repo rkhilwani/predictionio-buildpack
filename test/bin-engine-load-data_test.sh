@@ -9,7 +9,7 @@ pioCommandSpy=""
 afterSetUp() {
   PATH=./bin:$PATH
   appBinDir="$BUILD_DIR/bin"
-  appDataDir="$BUILD_DIR/pio-engine/data"
+  appDataDir="$BUILD_DIR/data"
   pioCommandSpy="${appBinDir}/pio"
   mkdir -p "${appBinDir}"
   mkdir -p "${appDataDir}"
@@ -234,7 +234,6 @@ HEREDOC
   capture ${BUILDPACK_HOME}/bin/engine/heroku-buildpack-pio-load-data
   assertEquals 1 ${rtrn}
   assertContains "did not produce the required output" "$(cat ${STD_OUT})"
-  assertContains "No such file" "$(cat ${STD_ERR})"
 }
 
 test_load_data_performs_sync()
@@ -333,5 +332,4 @@ HEREDOC
   capture ${BUILDPACK_HOME}/bin/engine/heroku-buildpack-pio-load-data
   assertEquals 0 ${rtrn}
   assertContains "did not produce the file" "$(cat ${STD_OUT})"
-  assertContains "No such file" "$(cat ${STD_ERR})"
 }

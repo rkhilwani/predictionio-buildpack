@@ -9,16 +9,15 @@ set -u
 # Debug, echo every command
 #set -x
 
-APP_PREFIX="pio-engine"
 BIN_PATH="bin" # because compile script moves bin/ up to app/
 CREATE_INITIAL_DATA_SCRIPT="data/create-initial-events"
-CREATE_INITIAL_DATA_SCRIPTPATH="$APP_PREFIX/$CREATE_INITIAL_DATA_SCRIPT"
+CREATE_INITIAL_DATA_SCRIPTPATH="$CREATE_INITIAL_DATA_SCRIPT"
 INITIAL_DATA_FILE="data/initial-events.json"
-INITIAL_DATA_FILEPATH="$APP_PREFIX/$INITIAL_DATA_FILE"
+INITIAL_DATA_FILEPATH="$INITIAL_DATA_FILE"
 SYNC_DATA_SCRIPT="data/create-sync-events"
-SYNC_DATA_SCRIPTPATH="$APP_PREFIX/$SYNC_DATA_SCRIPT"
+SYNC_DATA_SCRIPTPATH="$SYNC_DATA_SCRIPT"
 SYNC_DATA_FILE="data/sync-events.json"
-SYNC_DATA_FILEPATH="$APP_PREFIX/$SYNC_DATA_FILE"
+SYNC_DATA_FILEPATH="$SYNC_DATA_FILE"
 
 if [ -f "$CREATE_INITIAL_DATA_SCRIPTPATH" ] || [ -f "$INITIAL_DATA_FILEPATH" ] || [ -f "$SYNC_DATA_SCRIPTPATH" ]
 then
@@ -72,9 +71,6 @@ then
       echo "Fetching data using script '$CREATE_INITIAL_DATA_SCRIPT'."
       eval "$CREATE_INITIAL_DATA_SCRIPTPATH"
 
-      # Move the output file into the pio-engine/ prefix
-      mv $INITIAL_DATA_FILE $INITIAL_DATA_FILEPATH || true
-
       if [ ! -f "$INITIAL_DATA_FILEPATH" ]
         then
         echo "Error loading event data: '$CREATE_INITIAL_DATA_SCRIPT' did not produce the required output file '$INITIAL_DATA_FILE'."
@@ -94,9 +90,6 @@ then
       then
       echo "Fetching data using script '$SYNC_DATA_SCRIPT'."
       eval "$SYNC_DATA_SCRIPTPATH"
-
-      # Move the output file into the pio-engine/ prefix
-      mv $SYNC_DATA_FILE $SYNC_DATA_FILEPATH || true
 
       if [ -f "$SYNC_DATA_FILEPATH" ]
         then

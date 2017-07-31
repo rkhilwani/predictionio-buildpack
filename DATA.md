@@ -87,11 +87,10 @@ All three of these hooks work with the [batch import](https://predictionio.incub
 
 ```bash
 heroku run bash --size Performance-M
-$ cd pio-engine/
 $ ./data/create-sync-events
 $ pio app show $PIO_EVENTSERVER_APP_NAME
 # grab the ID of the app, replace `X` in next command
-$ pio import --appid X --input data/pio-engine/sync-events.json
+$ pio import --appid X --input data/sync-events.json
 ```
 
 ## REST API

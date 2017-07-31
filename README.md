@@ -4,6 +4,12 @@ Enables data scientists and developers to deploy custom machine learning service
 
 This buildpack is part of an exploration into utilizing the [Heroku developer experience](https://www.heroku.com/dx) to simplify data science operations. When considering this proof-of-concept technology, please note its [current limitations](#user-content-limitations). We'd love to hear from you. [Open issues on this repo](https://github.com/heroku/predictionio-buildpack/issues) with feedback and questions.
 
+## Releases
+
+**July 31st, 2017**: merged a [potentially breaking change](https://github.com/heroku/predictionio-buildpack/pull/44) to make the buildpack composable with Python, Node, and other Heroku buildpacks. We don't anticipate issues for most buildpack users, but if this does effect you, please checkout the details in the [original pull request](https://github.com/heroku/predictionio-buildpack/pull/44).
+
+See [all releases](https://github.com/heroku/predictionio-buildpack/releases) with their changes.
+
 ## Engines
 
 Supports engines created for PredictionIO version:
