@@ -52,37 +52,9 @@ The events data can be stored in:
 
 ### Memory
 
-This buildpack automatically trains the predictive model during [release phase](https://devcenter.heroku.com/articles/release-phase), which runs in a [one-off dyno](https://devcenter.heroku.com/articles/dynos). That dyno's memory capacity is a limiting factor at this time. Only [Performance dynos](https://www.heroku.com/pricing) with 2.5GB or 14GB RAM provide reasonable utility.
+This buildpack automatically trains the predictive model during [release phase](https://devcenter.heroku.com/articles/release-phase), which executes Spark as a sub-process (i.e. [`--master local`](https://spark.apache.org/docs/2.1.0/#running-the-examples-and-shell)) within [one-off and web dynos](https://devcenter.heroku.com/articles/dynos). That dyno's memory capacity is a limiting factor at this time. Only [Performance dynos](https://www.heroku.com/pricing) with 2.5GB or 14GB RAM provide reasonable utility.
 
 This limitation can be worked-around by pointing the engine at an existing Spark cluster. See: [customizing environment variables, `PIO_SPARK_OPTS` & `PIO_TRAIN_SPARK_OPTS`](CUSTOM.md#user-content-spark-configuration).
-
-### Private Network
-
-This is not a limitation for PredictionIO itself, but for the underlying Spark service. [Spark clusters](https://spark.apache.org/docs/1.6.3/spark-standalone.html) require a private network, so they cannot be deployed in the [Common Runtime](https://devcenter.heroku.com/articles/dyno-runtime).
-
-To operate in the Common Runtime this buildpack executes Spark as a sub-process (i.e. [`--master local`](https://spark.apache.org/docs/1.6.3/#running-the-examples-and-shell)) within [one-off and web dynos](https://devcenter.heroku.com/articles/dynos).
-
-This buildpack also supports executing jobs on an existing Spark cluster. See: [customizing environment variables, `PIO_SPARK_OPTS` & `PIO_TRAIN_SPARK_OPTS`](CUSTOM.md#user-content-spark-configuration).
-
-### Additional Service Dependencies
-
-Engines may require [Elasticsearch](https://predictionio.incubator.apache.org/system/) [ES] which is not currently supported with PredictionIO 0.10.0-incubating on Heroku (see [this pull request](https://github.com/heroku/predictionio-buildpack/pull/16)).
-
-[Heroku Postgres](https://www.heroku.com/postgres) is the default storage repository, so this does not effect most engines.
-
-✅ Fixed: **PredictionIO 0.11.0-incubating** supports ElasticSearch 5.x. An additional patch to [enable basic HTTP authentication](https://github.com/apache/incubator-predictionio/compare/develop...mars:esclient-auth) is included with buildpack deployments and will be included in an upcoming PredictionIO release.
-
-### Stateless Builds
-
-PredictionIO 0.10.0-incubating requires a database connection during the build phase. While this works fine in the [Common Runtime](https://devcenter.heroku.com/articles/dyno-runtime), it is not compatible with [Private Databases](https://devcenter.heroku.com/articles/heroku-postgres-and-private-spaces).
-
-✅ Fixed: **PredictionIO 0.11.0-incubating** supports stateless build, so deployment to both Common Runtime and Private Spaces is possible.
-
-### Config Files
-
-PredictionIO [engine templates](https://predictionio.incubator.apache.org/gallery/template-gallery/) typically have some configuration values stored alongside the source code in `engine.json`. Some of these values may vary between deployments, such as in a [pipeline](https://devcenter.heroku.com/articles/pipelines), where the same slug will be used to connect to different databases for Review Apps, Staging, & Production.
-
-Heroku [config vars](https://devcenter.heroku.com/articles/config-vars) solve many of the problems associated with these committed configuration files. When using a template or implementing a custom engine, the developer may migrate the engine to read the [environment variables](https://github.com/heroku/predictionio-buildpack/blob/master/CUSTOM.md#user-content-environment-variables) instead of the default file-based config, e.g. `sys.env("PIO_EVENTSERVER_APP_NAME")`.
 
 ## Development & Testing
 
