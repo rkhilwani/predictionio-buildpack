@@ -38,7 +38,7 @@ Please, follow the steps in the order documented.
   1. [Deploy the eventserver](#user-content-deploy-the-eventserver)
 * [Using pre-release features](#user-content-using-pre-release-features)
 * [Configuration](#user-content-configuration)
-  * [Migrate values from `engine.json`](#user-content-migrate-values-from-engine-json)
+  * [Migrate values from `engine.json`](#user-content-migrate-values-from-enginejson)
   * [Config files; `pio-env.sh`](#user-content-config-files)
   * [Environment variables](#user-content-environment-variables)
     * [Build configuration](#user-content-build-configuration)
