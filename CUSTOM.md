@@ -38,6 +38,7 @@ Please, follow the steps in the order documented.
   1. [Deploy the eventserver](#user-content-deploy-the-eventserver)
 * [Using pre-release features](#user-content-using-pre-release-features)
 * [Configuration](#user-content-configuration)
+  * [Migrate values from `engine.json`](#user-content-migrate-values-from-engine-json)
   * [Config files; `pio-env.sh`](#user-content-config-files)
   * [Environment variables](#user-content-environment-variables)
     * [Build configuration](#user-content-build-configuration)
@@ -137,7 +138,7 @@ Update so the `appName` parameter matches the value set for `PIO_EVENTSERVER_APP
   }
 ```
 
-⭐️  **A better alternative** is to delete the `"appName"` param from `engine.json`, and then use the environment variable value `sys.env("PIO_EVENTSERVER_APP_NAME")` in the engine source code.
+⭐️  **A better alternative** is to delete the `"appName"` param from `engine.json`, and then use an environment variable value in the engine source code. See: [Migrate values from `engine.json`](#user-content-migrate-values-from-engine-json).
 
 ### Import data
 
@@ -325,6 +326,15 @@ These changes will make the engine use the snapshot build included in the buildp
 
 ## Configuration
 
+### Migrate values from `engine.json`
+
+PredictionIO [engine templates](https://predictionio.incubator.apache.org/gallery/template-gallery/) typically have some configuration values stored alongside the source code in `engine.json`. Some of these values may vary between deployments, such as in a [pipeline](https://devcenter.heroku.com/articles/pipelines), where the same slug will be used to connect to different databases for Staging & Production. Also, the buildpack's [Data Flow hooks](DATA.md) rely on environment for configuration.
+
+Heroku [config vars](https://devcenter.heroku.com/articles/config-vars) solve many of the problems associated with these committed configuration files. When using a template or implementing a custom engine, the developer should migrate the engine to read the [environment variables](https://github.com/heroku/predictionio-buildpack/blob/master/CUSTOM.md#user-content-environment-variables) at runtime instead of the default file-based config:
+
+* `sys.env("PIO_EVENTSERVER_APP_NAME")` (if missing, will throw runtime error)
+* `sys.env.getOrElse("PIO_UR_ELASTICSEARCH_CONCURRENCY", "4")` (if missing, will fallback to default value)
+
 ### Config files
 
 The buildpack comes with [`config/`](config/) ERB templates that are rendered using the current [environment variables](#user-content-environment-variables) when the app is launched. Any one of these may be customized by creating a `config/` directory in your engine and copying over the template from this buildpack. Use caution when making modifications, as these configs are preset to work on Heroku. These include:
@@ -335,7 +345,10 @@ The buildpack comes with [`config/`](config/) ERB templates that are rendered us
 
 ### Environment variables
 
-Engine deployments honor the following config vars.
+Set the variables:
+
+* for [local development](DEV.md) in the `.env` file
+* for Heroku deployment with [`heroku config:set …`](https://devcenter.heroku.com/articles/config-vars)
 
 #### Build configuration
 
