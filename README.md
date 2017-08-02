@@ -6,7 +6,7 @@ This buildpack is part of an exploration into utilizing the [Heroku developer ex
 
 ## Releases
 
-**July 31st, 2017**: merged a [potentially breaking change](https://github.com/heroku/predictionio-buildpack/pull/44) to make the buildpack composable with Python, Node, and other Heroku buildpacks. We don't anticipate issues for most buildpack users, but if this does effect you, please checkout the details in the [original pull request](https://github.com/heroku/predictionio-buildpack/pull/44).
+**July 31st, 2017**: merged a [breaking change](https://github.com/heroku/predictionio-buildpack/pull/44) to make the buildpack composable with Python, Node, and other Heroku buildpacks. **Going forward, this buildpack no longer supports PredictionIO 0.10.** If this does effect you, please checkout the details in the [original pull request](https://github.com/heroku/predictionio-buildpack/pull/44).
 
 See [all releases](https://github.com/heroku/predictionio-buildpack/releases) with their changes.
 
@@ -14,10 +14,12 @@ See [all releases](https://github.com/heroku/predictionio-buildpack/releases) wi
 
 Supports engines created for PredictionIO version:
 
-  * **0.11.0-incubating**
+* **0.11.0-incubating**
     * with Scala 2.11, Spark 2.1, & Hadoop 2.7
-  * **0.10.0-incubating**
+* ~~0.10.0-incubating~~
     * with Scala 2.10, Spark 1.6, & Hadoop 2.6
+    * no longer supported on master
+    * see how to [upgrade or temporarily fix](https://github.com/heroku/predictionio-buildpack/pull/44)
 
 Get started with an engine:
 
