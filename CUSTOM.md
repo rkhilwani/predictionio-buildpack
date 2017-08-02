@@ -138,7 +138,7 @@ Update so the `appName` parameter matches the value set for `PIO_EVENTSERVER_APP
   }
 ```
 
-⭐️  **A better alternative** is to delete the `"appName"` param from `engine.json`, and then use an environment variable value in the engine source code. See: [Migrate values from `engine.json`](#user-content-migrate-values-from-engine-json).
+⭐️  **A better alternative** is to delete the `"appName"` param from `engine.json`, and then use an environment variable value in the engine source code. See: [Migrate values from `engine.json`](#user-content-migrate-values-from-enginejson).
 
 ### Import data
 
