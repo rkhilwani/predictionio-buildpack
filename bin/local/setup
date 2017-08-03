@@ -52,12 +52,6 @@ cp $BP_DIR/bin/local/pio $BUILD_DIR/bin/pio
 chmod +x $BUILD_DIR/bin/pio
 
 echo
-echo 'If the authenticated Elasticsearch patch is required,'
-echo 'then revise `build.sbt`:'
-echo
-echo '  * update: "0.11.0-incubating" to: "0.11.0-SNAPSHOT"'
-echo '  * append: resolvers += "Buildpack Repository" at "file://"+baseDirectory.value+"/repo"'
-echo
 echo 'PredictionIO is setup 🐸'
 echo 'Use it with:'
 echo

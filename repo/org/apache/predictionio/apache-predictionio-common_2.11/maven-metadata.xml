@@ -4,8 +4,8 @@
   <artifactId>apache-predictionio-common_2.11</artifactId>
   <versioning>
     <versions>
-      <version>0.11.0-SNAPSHOT</version>
+      <version>0.12.0-SNAPSHOT</version>
     </versions>
-    <lastUpdated>20170719202955</lastUpdated>
+    <lastUpdated>20170803180541</lastUpdated>
   </versioning>
 </metadata>

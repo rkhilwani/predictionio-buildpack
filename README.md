@@ -14,7 +14,7 @@ See [all releases](https://github.com/heroku/predictionio-buildpack/releases) wi
 
 Supports engines created for PredictionIO version:
 
-* **0.11.0-incubating**
+* **0.12.0-incubating** & **0.11.0-incubating**
     * with Scala 2.11, Spark 2.1, & Hadoop 2.7
 * ~~0.10.0-incubating~~
     * with Scala 2.10, Spark 1.6, & Hadoop 2.6

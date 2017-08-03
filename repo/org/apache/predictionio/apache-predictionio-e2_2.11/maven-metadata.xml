@@ -4,8 +4,8 @@
   <artifactId>apache-predictionio-e2_2.11</artifactId>
   <versioning>
     <versions>
-      <version>0.11.0-SNAPSHOT</version>
+      <version>0.12.0-SNAPSHOT</version>
     </versions>
-    <lastUpdated>20170719203000</lastUpdated>
+    <lastUpdated>20170803180546</lastUpdated>
   </versioning>
 </metadata>

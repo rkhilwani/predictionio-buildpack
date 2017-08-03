@@ -79,9 +79,15 @@ then
     PIO_VERSION=0.10.0-incubating
     PIO_BUILD_SPARK_VERSION=1.6.3
     PIO_BUILD_HADOOP_VERSION=2.6
+    echo "PredictionIO 0.10.0-incubating is no longer supported by this buildpack." | indent
+    echo "  More info: https://github.com/heroku/predictionio-buildpack/pull/44" | indent
+    exit 1
   elif [[ $requires_pio_version =~ ^0\.11\.0-SNAPSHOT ]]
     then
     PIO_VERSION=0.11.0-SNAPSHOT-esclient-auth-with-batch-predict-v12
+  elif [[ $requires_pio_version =~ ^0\.12 ]]
+    then
+    PIO_VERSION=0.12.0-SNAPSHOT-cfa3f5da
   else
     PIO_VERSION=0.11.0-incubating
   fi
