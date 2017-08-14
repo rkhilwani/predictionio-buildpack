@@ -87,7 +87,7 @@ then
     PIO_VERSION=0.11.0-SNAPSHOT-esclient-auth-with-batch-predict-v12
   elif [[ $requires_pio_version =~ ^0\.12\.0-SNAPSHOT ]]
     then
-    PIO_VERSION=0.12.0-SNAPSHOT-esclient-auth-singleton-v01
+    PIO_VERSION=0.12.0-SNAPSHOT-esclient-auth-singleton-v04
   elif [[ $requires_pio_version =~ ^0\.12 ]]
     then
     PIO_VERSION=0.12.0-incubating
