@@ -132,10 +132,10 @@ $PIO_BUILDPACK_DIR/bin/local/setup
 1. If the [Authenticated Elasticsearch patch](https://github.com/apache/incubator-predictionio/pull/372) is required (e.g. for the [Universal Recommender](https://github.com/heroku/predictionio-engine-ur)), then revise:
 
     * **build.sbt**
-      * change: `"0.11.0-incubating"` to: `"0.11.0-SNAPSHOT"`
+      * change: `"0.11.0-incubating"` to: `"0.12.0-SNAPSHOT"`
       * append: `resolvers += "Buildpack Repository" at "file://"+baseDirectory.value+"/repo"`
     * **template.json**
-      * change: `"0.11.0-incubating"` to: `"0.11.0-SNAPSHOT"`
+      * change: `"0.11.0-incubating"` to: `"0.12.0-SNAPSHOT"`
 
     These changes will make the engine use the snapshot build included in the buildpack's `repo/`.
 
@@ -172,3 +172,17 @@ bin/pio eventserver
 ## Deployment
 
 ▶️ [How to deploy to Heroku](CUSTOM.md)
+
+
+## Reset
+
+If local dev seems broken, try clearing out the local install, and then reinstall.
+
+🚨 **This will result in destruction of local state contained in these directories.**
+
+```bash
+rm -rf PredictionIO-dist/ repo/
+```
+
+Then, [refresh the setup](#user-content-refreshing-the-setup).
+
