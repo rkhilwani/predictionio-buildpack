@@ -312,15 +312,15 @@ A SNAPSHOT distribution of PredictionIO is included with this buildpack, to supp
 * Authenticated Elasticsearch 5 client & various fixes (to support [Universal Recommender](https://github.com/heroku/predictionio-engine-ur))
 * Batch predictions with the new `pio batchpredict` command
 
-[Compare the SNAPSHOT branch](https://github.com/apache/incubator-predictionio/compare/develop...mars:esclient-auth-with-batch-predict) to see all changes.
+[Compare the last release v0.11.0 to the SNAPSHOT build of develop](https://github.com/apache/incubator-predictionio/compare/release/0.11.0...bf84ede6fe475ec591e784eb453c6194befb8515) to see all changes.
 
 ### Switch an engine to SNAPSHOT
 
 * **build.sbt**
-  * change: `"0.11.0-incubating"` to: `"0.11.0-SNAPSHOT"`
+  * change: `"0.11.0-incubating"` to: `"0.12.0-SNAPSHOT"`
   * append: `resolvers += "Buildpack Repository" at "file://"+baseDirectory.value+"/repo"`
 * **template.json**
-  * change: `"0.11.0-incubating"` to: `"0.11.0-SNAPSHOT"`
+  * change: `"0.11.0-incubating"` to: `"0.12.0-SNAPSHOT"`
 
 These changes will make the engine use the snapshot build included in the buildpack's `repo/`.
 
