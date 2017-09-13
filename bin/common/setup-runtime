@@ -90,7 +90,8 @@ then
     PIO_VERSION=0.12.0-SNAPSHOT-develop-bf84ede6
   elif [[ $requires_pio_version =~ ^0\.12 ]]
     then
-    PIO_VERSION=0.12.0-incubating
+    PIO_VERSION=0.12.0-incubating-rc1
+    PIO_MAVEN_REPO="${PIO_MAVEN_REPO:-https://dist.apache.org/repos/dist/dev/incubator/predictionio/0.12.0-incubating-rc1/}"
   else
     PIO_VERSION=0.11.0-incubating
   fi
