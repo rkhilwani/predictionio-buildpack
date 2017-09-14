@@ -39,10 +39,18 @@ source ./bin/common/setup-runtime "$BUILD_DIR" "$BP_DIR"
 
 if [ -d "$BP_DIR/repo" ]
   then
-  echo "+ local Maven repo from buildpack (build.sbt entry)" | indent
+  echo "+ Maven repo from buildpack (build.sbt entry)" | indent
   (echo && \
     echo '// Search for packages provided by predictionio-buildpack' && \
     echo 'resolvers += "Local Repository" at "file://"+baseDirectory.value+"/repo"') >> $BUILD_DIR/build.sbt
+fi
+
+if [ "${PIO_MAVEN_REPO:-}" ]
+  then
+  echo "+ Maven repo $PIO_MAVEN_REPO (build.sbt entry)" | indent
+  (echo && \
+    echo '// Search for packages in custom repo via predictionio-buildpack' && \
+    echo "resolvers += \"Custom Repository via PIO_MAVEN_REPO\" at \"$PIO_MAVEN_REPO\"") >> $BUILD_DIR/build.sbt
 fi
 
 echo "Set-up environment via '.profile.d/' scripts" | indent
