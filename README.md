@@ -17,9 +17,10 @@ Create and deploy engines with **Scala 2.11.8**, **Spark 2.1.0**, & **Hadoop 2.7
 Supported versions of PredictionIO:
 
 * **0.12.0-incubating RC**
-    * [release candidate](https://github.com/apache/incubator-predictionio/tree/release/0.12.0) includes:
+    * **[release candidate](https://github.com/apache/incubator-predictionio/tree/release/0.12.0)** includes:
       * Elasticsearch 5 client with HTTP basic authentication and connection pooling, supports [Bonsai add-on](https://elements.heroku.com/addons/bonsai)
-      * Batch predictions via [`pio batchpredict`](https://github.com/apache/incubator-predictionio/blob/develop/docs/manual/source/batchpredict/index.html.md)
+      * batch predictions via [`pio batchpredict`](https://github.com/apache/incubator-predictionio/blob/develop/docs/manual/source/batchpredict/index.html.md)
+      * more features & fixes are listed in the [release notes](https://github.com/apache/incubator-predictionio/blob/release/0.12.0/RELEASE.md)
     * specify [`0.12.0-incubating` in configs](CUSTOM.md#user-content-update-source-configs)
 * **0.11.0-incubating**
     * specify [`0.11.0-incubating` in configs](CUSTOM.md#user-content-update-source-configs)
