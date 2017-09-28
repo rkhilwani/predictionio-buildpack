@@ -26,22 +26,6 @@ function indent() {
   esac
 }
 
-# If the engine requires the newer Apache distribution
-# returns 'true', and otherwise '' (empty string)
-requires_apache_predictionio() {
-  local template_json=$1
-  if [ -e $template_json ]
-  then
-    cat $template_json | ruby \
-      -E utf-8:utf-8 \
-      -r json \
-      -e "version = JSON.parse(STDIN.read)['pio']['version']['min']; major,minor = version.split('.').map(&:to_i); STDOUT << (major>=0 && minor>=10 ? 'true' : '')"
-  else
-    # without a template file, assume we're build the eventserver on the newest version
-    echo 'true'
-  fi
-}
-
 # Simply returns the version string
 get_predictionio_version() {
   local template_json=$1
@@ -53,7 +37,7 @@ get_predictionio_version() {
       -e "STDOUT << JSON.parse(STDIN.read)['pio']['version']['min']"
   else
     # without a template file, assume we're build the eventserver on the newest version
-    echo '0.11.0-incubating'
+    echo '0.12.0-incubating'
   fi
 }
 
@@ -65,48 +49,33 @@ BP_DIR="${2:-$(cd $(dirname ${0:-}); cd ../..; pwd)}"
 POSTGRESQL_DRIVER=https://marsikai.s3.amazonaws.com/postgresql-9.4.1209.jar
 HADOOP_AWS_SUPPORT=https://marsikai.s3.amazonaws.com/hadoop-aws-2.7.3.jar
 AWS_SDK=https://marsikai.s3.amazonaws.com/aws-java-sdk-1.7.4.jar
-ELASTICSEARCH_DIST_URL=https://marsikai.s3.amazonaws.com/elasticsearch-5.1.1.tar.gz
+ELASTICSEARCH_DIST_URL=https://marsikai.s3.amazonaws.com/elasticsearch-5.5.2.tar.gz
 
-if [ "${PREDICTIONIO_DIST_URL:-}" ]
-then
-  PIO_VERSION=custom-distribution
-  echo "Using PredictionIO distribution at ${PREDICTIONIO_DIST_URL}" | indent
-elif [ $(requires_apache_predictionio "$BUILD_DIR/template.json") ]
-then
-  requires_pio_version=$(get_predictionio_version "$BUILD_DIR/template.json")
-  if [[ $requires_pio_version =~ ^0\.10 ]]
-    then
-    PIO_VERSION=0.10.0-incubating
-    PIO_BUILD_SPARK_VERSION=1.6.3
-    PIO_BUILD_HADOOP_VERSION=2.6
-    echo "PredictionIO 0.10.0-incubating is no longer supported by this buildpack." | indent
-    echo "  More info: https://github.com/heroku/predictionio-buildpack/pull/44" | indent
-    exit 1
-  elif [[ $requires_pio_version =~ ^0\.11\.0-SNAPSHOT ]]
-    then
-    PIO_VERSION=0.11.0-SNAPSHOT-esclient-auth-with-batch-predict-v12
-  elif [[ $requires_pio_version =~ ^0\.12\.0-SNAPSHOT ]]
-    then
-    PIO_VERSION=0.12.0-SNAPSHOT-develop-bf84ede6
-  elif [[ $requires_pio_version =~ ^0\.12 ]]
-    then
-    PIO_VERSION=0.12.0-incubating-rc3
-    # Dist URL & staging repo are paired by the PredictionIO release process
-    PREDICTIONIO_DIST_URL="${PREDICTIONIO_DIST_URL:-https://dist.apache.org/repos/dist/dev/incubator/predictionio/0.12.0-incubating-rc3/apache-predictionio-0.12.0-incubating-bin.tar.gz}"
-    PIO_MAVEN_REPO="${PIO_MAVEN_REPO:-https://repository.apache.org/content/repositories/orgapachepredictionio-1021/}"
-  else
-    PIO_VERSION=0.11.0-incubating
-  fi
-  echo "Using Apache PredictionIO ${PIO_VERSION}" | indent
+requires_pio_version=$(get_predictionio_version "$BUILD_DIR/template.json")
+if [[ $requires_pio_version =~ ^0\.10 ]]
+  then
+  echo "PredictionIO 0.10.0-incubating is no longer supported by this buildpack." | indent
+  echo "  More info: https://github.com/heroku/predictionio-buildpack/pull/44" | indent
+  exit 1
+elif [[ $requires_pio_version =~ ^0\.11\.0-SNAPSHOT ]]
+  then
+  PIO_VERSION=0.11.0-SNAPSHOT-esclient-auth-with-batch-predict-v12
+  PIO_BUILD_SPARK_VERSION=2.1.0
+elif [[ $requires_pio_version =~ ^0\.11 ]]
+  then
+  PIO_VERSION=0.11.0-incubating
+  PIO_BUILD_SPARK_VERSION=2.1.0
+elif [[ $requires_pio_version =~ ^0\.12 ]]
+  then
+  PIO_VERSION=0.12.0-incubating
+  PREDICTIONIO_DIST_URL="${PREDICTIONIO_DIST_URL:-https://dist.apache.org/repos/dist/release/incubator/predictionio/0.12.0-incubating/apache-predictionio-0.12.0-incubating-bin.tar.gz}"
 else
-  mkdir -p "$BUILD_DIR/.heroku"
-  echo '# Presence of this file indicates a pre-Apache engine (<= 0.9)' > "$BUILD_DIR/.heroku/.is_old_predictionio"
-  PIO_VERSION=0.9.5
-  echo "Using PredictionIO $PIO_VERSION" | indent
+  echo "The PredictionIO version specified in template.json ($requires_pio_version) is not compatible." | indent
+  exit 1
 fi
 
 PIO_BUILD=PredictionIO-${PIO_VERSION}
-SPARK_VERSION="spark-${PIO_BUILD_SPARK_VERSION:-2.1.0}-bin-hadoop${PIO_BUILD_HADOOP_VERSION:-2.7}"
+SPARK_VERSION="spark-${PIO_BUILD_SPARK_VERSION:-2.1.1}-bin-hadoop${PIO_BUILD_HADOOP_VERSION:-2.7}"
 
 # PredictionIO dist tarball URL, expects `.tar.gz` 
 default_url="https://marsikai.s3.amazonaws.com/${PIO_BUILD}.tar.gz"

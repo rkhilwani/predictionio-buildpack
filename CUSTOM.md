@@ -106,7 +106,7 @@ The version of PredictionIO used for deployment is based in the value in this fi
 ```json
   "pio": {
     "version" : {
-      "min": "0.11.0-incubating"
+      "min": "0.12.0-incubating"
     }
   }
 ```
@@ -121,7 +121,7 @@ scalaVersion := "2.11.8"
 organization := "org.apache.predictionio"
 
 libraryDependencies ++= Seq(
-  "org.apache.predictionio" %% "apache-predictionio-core" % "0.11.0-incubating" % "provided",
+  "org.apache.predictionio" %% "apache-predictionio-core" % "0.12.0-incubating" % "provided",
   "org.apache.spark"        %% "spark-core"               % "2.1.0" % "provided",
   "org.apache.spark"        %% "spark-mllib"              % "2.1.0" % "provided")
 ```
