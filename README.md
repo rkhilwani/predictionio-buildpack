@@ -6,26 +6,25 @@ This buildpack is part of an exploration into utilizing the [Heroku developer ex
 
 ## Releases
 
-**July 31st, 2017**: merged a [breaking change](https://github.com/heroku/predictionio-buildpack/pull/44) to make the buildpack composable with Python, Node, and other Heroku buildpacks. **Going forward, this buildpack no longer supports PredictionIO 0.10.** If this does effect you, please checkout the details in the [original pull request](https://github.com/heroku/predictionio-buildpack/pull/44).
+**September 28th, 2017**: PredictionIO 0.12.0-incubating is now the default. Includes:
+  * Elasticsearch 5 client with HTTP basic auth and connection pooling; supports [Bonsai add-on](https://elements.heroku.com/addons/bonsai)
+  * batch predictions via [`pio batchpredict`](https://github.com/apache/incubator-predictionio/blob/develop/docs/manual/source/batchpredict/index.html.md)
+  * more features & fixes are listed in PredictionIO's [release notes](https://github.com/apache/incubator-predictionio/blob/release/0.12.0/RELEASE.md)
 
 See [all releases](https://github.com/heroku/predictionio-buildpack/releases) with their changes.
 
 ## Engines
 
-Create and deploy engines with **Scala 2.11.8**, **Spark 2.1.0**, & **Hadoop 2.7.3**.
+Create and deploy engines for PredictionIO versions:
 
-Supported versions of PredictionIO:
-
-* **0.12.0-incubating RC**
-    * **[release candidate](https://github.com/apache/incubator-predictionio/tree/release/0.12.0)** includes:
-      * Elasticsearch 5 client with HTTP basic authentication and connection pooling, supports [Bonsai add-on](https://elements.heroku.com/addons/bonsai)
-      * batch predictions via [`pio batchpredict`](https://github.com/apache/incubator-predictionio/blob/develop/docs/manual/source/batchpredict/index.html.md)
-      * more features & fixes are listed in the [release notes](https://github.com/apache/incubator-predictionio/blob/release/0.12.0/RELEASE.md)
+* **0.12.0-incubating**
+    * **Scala 2.11.8**, **Spark 2.1.1**, & **Hadoop 2.7.3**
     * specify [`0.12.0-incubating` in configs](CUSTOM.md#user-content-update-source-configs)
 * **0.11.0-incubating**
+    * **Scala 2.11.8**, **Spark 2.1.0**, & **Hadoop 2.7.3**
     * specify [`0.11.0-incubating` in configs](CUSTOM.md#user-content-update-source-configs)
 * ~~0.10.0-incubating~~
-    * no longer supported on master
+    * no longer supported
     * see how to [upgrade or temporarily fix](https://github.com/heroku/predictionio-buildpack/pull/44)
 
 Get started with an engine:
