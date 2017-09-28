@@ -6,10 +6,7 @@ This buildpack is part of an exploration into utilizing the [Heroku developer ex
 
 ## Releases
 
-**September 28th, 2017**: PredictionIO 0.12.0-incubating is now the default. Includes:
-  * Elasticsearch 5 client with HTTP basic auth and connection pooling; supports [Bonsai add-on](https://elements.heroku.com/addons/bonsai)
-  * batch predictions via [`pio batchpredict`](https://github.com/apache/incubator-predictionio/blob/develop/docs/manual/source/batchpredict/index.html.md)
-  * more features & fixes are listed in PredictionIO's [release notes](https://github.com/apache/incubator-predictionio/blob/release/0.12.0/RELEASE.md)
+**September 28th, 2017**: PredictionIO 0.12.0-incubating is now supported.
 
 See [all releases](https://github.com/heroku/predictionio-buildpack/releases) with their changes.
 
