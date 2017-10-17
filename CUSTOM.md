@@ -36,7 +36,6 @@ Please, follow the steps in the order documented.
   1. [Re-deploy best parameters](#user-content-re-deploy-best-parameters)
 * [Eventserver](#user-content-eventserver) (optional)
   1. [Deploy the eventserver](#user-content-deploy-the-eventserver)
-* [Using pre-release features](#user-content-using-pre-release-features)
 * [Configuration](#user-content-configuration)
   * [Migrate values from `engine.json`](#user-content-migrate-values-from-enginejson)
   * [Config files; `pio-env.sh`](#user-content-config-files)
@@ -304,25 +303,6 @@ git push heroku-eventserver master
 ```
 
 Note that some add-ons, such as Bonsai Elasticsearch, do not officially support attaching to multiple apps. In these cases, their config var values must be manually copied & maintained between the engine to the eventserver.
-
-## Using pre-release features
-
-A SNAPSHOT distribution of PredictionIO is included with this buildpack, to support a few features that are ahead of the main PredictionIO release:
-
-* Authenticated Elasticsearch 5 client & various fixes (to support [Universal Recommender](https://github.com/heroku/predictionio-engine-ur))
-* Batch predictions with the new `pio batchpredict` command
-
-[Compare the last release v0.11.0 to the SNAPSHOT build of develop](https://github.com/apache/incubator-predictionio/compare/release/0.11.0...bf84ede6fe475ec591e784eb453c6194befb8515) to see all changes.
-
-### Switch an engine to SNAPSHOT
-
-* **build.sbt**
-  * change: `"0.11.0-incubating"` to: `"0.12.0-SNAPSHOT"`
-  * append: `resolvers += "Buildpack Repository" at "file://"+baseDirectory.value+"/repo"`
-* **template.json**
-  * change: `"0.11.0-incubating"` to: `"0.12.0-SNAPSHOT"`
-
-These changes will make the engine use the snapshot build included in the buildpack's `repo/`.
 
 ## Configuration
 
