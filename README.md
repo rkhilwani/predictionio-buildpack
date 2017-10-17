@@ -55,14 +55,16 @@ The events data can be stored in:
 
 ### Memory
 
-This buildpack automatically trains the predictive model during [release phase](https://devcenter.heroku.com/articles/release-phase), which executes Spark as a sub-process (i.e. [`--master local`](https://spark.apache.org/docs/2.1.0/#running-the-examples-and-shell)) within [one-off and web dynos](https://devcenter.heroku.com/articles/dynos). That dyno's memory capacity is a limiting factor at this time. Only [Performance dynos](https://www.heroku.com/pricing) with 2.5GB or 14GB RAM provide reasonable utility.
+PredictionIO requires 2GB of memory. It runs well on Heroku's [Performance dynos](https://www.heroku.com/pricing) with 2.5GB or 14GB RAM. Smaller dynos cannot run PredictionIO reliably.
 
-This limitation can be worked-around by pointing the engine at an existing Spark cluster. See: [customizing environment variables, `PIO_SPARK_OPTS` & `PIO_TRAIN_SPARK_OPTS`](CUSTOM.md#user-content-spark-configuration).
+This buildpack automatically trains the model during [release phase](https://devcenter.heroku.com/articles/release-phase), which executes Spark as a sub-process (i.e. [`--master local`](https://spark.apache.org/docs/2.1.0/#running-the-examples-and-shell)) within [one-off and web dynos](https://devcenter.heroku.com/articles/dynos). If the dataset and operations performed with Spark require more than 14GB memory, then it's possible to point the engine's Spark driver at an existing Spark cluster. (Running a Spark cluster is beyond the scope of this buildpack.) See: [customizing environment variables, `PIO_SPARK_OPTS` & `PIO_TRAIN_SPARK_OPTS`](CUSTOM.md#user-content-spark-configuration).
 
-## Development & Testing
+## Usage
 
-🛠 Follow the [local development](DEV.md) workflow to setup an engine on your computer.
+🐸 [Deploy an Engine](CUSTOM.md) to Heroku.
 
-🔍 See the [Data Flow docs](DATA.md) for how to leverage the built-in import & sync workflow.
+🛠 Use the [Local Development](DEV.md) workflow to setup an engine on your computer.
 
-🤓 Info for [testing](CUSTOM.md#user-content-testing) this buildpack & individual engines.
+⏩ Leverage the buildpack's [Data Flow](DATA.md) to automate import & synchronization of event data.
+
+🤓 [Testing](CUSTOM.md#user-content-testing) this buildpack & individual engines.
