@@ -52,9 +52,7 @@ Please, follow the steps in the order documented.
 
 ## Engine
 
-🏷 This buildpack should be used with engine templates for **PredictionIO 0.11**.
-
-🔋 Engines already optimized for Heroku are listed in the main [builpack README](README.md#user-content-engines).
+🔋 Engines already optimized for Heroku are listed in the main [buildpack README](README.md#user-content-engines).
 
 📐 Starting-points may be found in the [template gallery](https://predictionio.incubator.apache.org/gallery/template-gallery/). Download the `.tar.gz` from Github and open/expand it on your local computer.
 
