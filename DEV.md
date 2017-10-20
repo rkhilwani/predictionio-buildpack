@@ -38,19 +38,8 @@ If you previously used PredictionIO, then you might have added the `pio` command
 ⚠️ *This step is only required once for your computer.*
 
 1. Install [Java/JDK 8](https://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
-1. Install [PostgreSQL 9.6](https://www.postgresql.org/download/); for macOS, we 💜 [Postgres.app](http://postgresapp.com)
-   1. start Postgres
-      * for **Postgres.app** use its elephant menubar widget
-      * varies by install method and platform
-   1. create the database and grant access to work with the [buildpack's `pio-env.sh` config](https://github.com/heroku/predictionio-buildpack/blob/local-dev/config/pio-env.sh) (database `pio`, username `pio`, & password `pio`):
-
-      ```bash
-      $ psql
-      CREATE DATABASE pio;
-      CREATE ROLE pio WITH password 'pio';
-      GRANT ALL PRIVILEGES ON DATABASE pio TO pio;
-      ALTER ROLE pio WITH LOGIN;
-      ```
+1. Install [PostgreSQL 9.6](https://www.postgresql.org/download/) and start it
+   * for macOS, we 💜 [Postgres.app](http://postgresapp.com)
 
 ### 2. The Buildpack
 
@@ -112,11 +101,39 @@ Here's how:
 # Capture the path to the buildpack on your machine (from Step 2.)
 export PIO_BUILDPACK_DIR=~/my/projects/predictionio-buildpack
 
-# Then, inside the engine to refresh,
+# Then, inside the engine to refresh:
 $PIO_BUILDPACK_DIR/bin/local/setup
+
+# Finally, verify the new setup is working; Postgres & optionally Elasticsearch must be running:
+bin/pio status
 ```
 
-### 4. Elasticsearch (optional)
+If you encounter errors, it may be necessary to [reset the local development installation](#user-content-reset).
+
+### 4. Postgres
+
+1. Start Postgres
+   * for **Postgres.app**, use the 🐘 menubar item to start the server
+   * other installation methods have their own start-up process
+1. Configure each engine to use its own database. The `.env` file should define the unique database connection like this:
+
+   ✏️ *Replace `my_database_name` with a name for your engine's database.*
+
+   ```bash
+   DATABASE_URL=postgres://pio@localhost/my_database_name
+   PIO_POSTGRES_OPTIONAL_SSL=true
+   ```
+1. Create the Postgres user & database to match that configuration:
+
+   ```bash
+   createuser pio
+   createdb my_database_name
+   ```
+
+   👓 These binary commands are [included with Postgres](https://www.postgresql.org/docs/9.6/static/reference-client.html). You may need to reference them directly from the database installation.
+
+
+### 5. Elasticsearch (optional)
 
 ⚠️ *Only available if `PIO_ELASTICSEARCH_URL` is set during `bin/local/setup`.*
 
@@ -139,7 +156,7 @@ cd PredictionIO-dist/vendors/elasticsearch/
 bin/elasticsearch
 ```
 
-### 5. Finally, use `bin/pio`
+### 6. Finally, use `bin/pio`
 
 ```bash
 bin/pio status
