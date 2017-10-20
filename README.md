@@ -16,10 +16,10 @@ Create and deploy engines for PredictionIO versions:
 
 * **0.12.0-incubating**
     * **Scala 2.11.8**, **Spark 2.1.1**, & **Hadoop 2.7.3**
-    * specify [`0.12.0-incubating` in configs](CUSTOM.md#user-content-update-source-configs)
+    * specify these versions in the [engine template's configs](CUSTOM.md#user-content-update-source-configs)
 * **0.11.0-incubating**
     * **Scala 2.11.8**, **Spark 2.1.0**, & **Hadoop 2.7.3**
-    * specify [`0.11.0-incubating` in configs](CUSTOM.md#user-content-update-source-configs)
+    * specify these versions in the [engine template's configs](CUSTOM.md#user-content-update-source-configs)
 * ~~0.10.0-incubating~~
     * no longer supported
     * see how to [upgrade or temporarily fix](https://github.com/heroku/predictionio-buildpack/pull/44)
