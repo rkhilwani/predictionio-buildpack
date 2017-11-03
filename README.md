@@ -30,6 +30,10 @@ Get started with an engine:
   * presented at [TrailheaDX 2017](https://www.youtube.com/watch?v=MO0Bmty9fmc)
 * [Classification engine](https://github.com/heroku/predictionio-engine-classification)
   * presented at [TrailheaDX 2017](https://www.youtube.com/watch?v=MO0Bmty9fmc) & [Dreamforce 2016](https://www.salesforce.com/video/297129/)
+* [Regression engine](https://github.com/heroku/predictionio-engine-regression)
+  * to be presented at [Dreamforce 2017](https://www.salesforce.com/dreamforce/)  
+    *Open-source at Salesforce* booth in the Developer Forest  
+    3:30-6pm, Wednesday, November 8
 * [Template Gallery](https://predictionio.incubator.apache.org/gallery/template-gallery/)
   * starting-points for many use-cases
   * follow [custom engine docs](CUSTOM.md) to use with this buildpack
