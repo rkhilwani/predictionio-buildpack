@@ -87,7 +87,7 @@ export PIO_DIST_DIR="$BUILD_DIR/$PIO_DIST_NAME"
 
 topic 'Install core components'
 
-echo "+ PredictionIO (${PIO_VERSION})" | indent
+echo "+ PredictionIO (${url})" | indent
 curl -s -L "$url" > "${PIO_DIST_NAME}.tar.gz"
 mkdir -p "$PIO_DIST_DIR"
 tar -xz -f "${PIO_DIST_NAME}.tar.gz" -C "$PIO_DIST_DIR" --strip-components=1 | indent
