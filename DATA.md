@@ -1,3 +1,5 @@
+⚠️ **This project is no longer active.** No further updates are planned.
+
 # Data Flow
 
 Training a PredictionIO engine requires data. The right data. Where does this data come from? Where is it stored? And how do we keep it up to date? PredictionIO provides event storage, the eventserver, to collect data and provide a common schema for engines to work with that data.
