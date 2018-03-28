@@ -1,3 +1,5 @@
+⚠️ **This project is no longer active.** No further updates are planned.
+
 # Local Development
 
 Use [predictionio-buildpack](README.md) to setup your local PredictionIO environment.
