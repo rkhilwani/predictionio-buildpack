@@ -1,3 +1,5 @@
+⚠️ **This project is no longer active.** No further updates are planned.
+
 # [Heroku buildpack](https://devcenter.heroku.com/articles/buildpacks) for PredictionIO
 
 Enables data scientists and developers to deploy custom machine learning services created with [PredictionIO](https://predictionio.incubator.apache.org).
