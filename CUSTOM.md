@@ -1,3 +1,5 @@
+⚠️ **This project is no longer active.** No further updates are planned.
+
 # Deploy [PredictionIO](http://predictionio.incubator.apache.org) to Heroku
 
 👓 Requires intermediate technical skills working with PredictionIO, the Scala programming language, and Heroku.
