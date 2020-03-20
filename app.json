@@ -9,7 +9,7 @@
   ],
   "buildpacks": [
     {
-      "url": "https://github.com/heroku/predictionio-buildpack.git"
+      "url": "https://github.com/rkhilwani/predictionio-buildpack.git"
     }
   ]
 }

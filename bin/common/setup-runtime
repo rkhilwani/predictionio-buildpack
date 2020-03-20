@@ -43,8 +43,10 @@ get_predictionio_version() {
 
 # The build dir is the first arg or calling script current dir.
 BUILD_DIR="${1:-$(pwd)}"
+echo "---------> BUILD_DIR $BUILD_DIR"
 # The buildpack dir is the first are, or two directories up from this script.
 BP_DIR="${2:-$(cd $(dirname ${0:-}); cd ../..; pwd)}"
+echo "-----------> BP_DIR $BP_DIR"
 
 POSTGRESQL_DRIVER=https://marsikai.s3.amazonaws.com/postgresql-9.4.1209.jar
 HADOOP_AWS_SUPPORT=https://marsikai.s3.amazonaws.com/hadoop-aws-2.7.3.jar
@@ -52,6 +54,8 @@ AWS_SDK=https://marsikai.s3.amazonaws.com/aws-java-sdk-1.7.4.jar
 ELASTICSEARCH_DIST_URL=https://marsikai.s3.amazonaws.com/elasticsearch-5.5.2.tar.gz
 
 requires_pio_version=$(get_predictionio_version "$BUILD_DIR/template.json")
+echo 'version '
+echo
 if [[ $requires_pio_version =~ ^0\.10 ]]
   then
   echo "PredictionIO 0.10.0-incubating is no longer supported by this buildpack." | indent
@@ -69,17 +73,23 @@ elif [[ $requires_pio_version =~ ^0\.12 ]]
   then
   PIO_VERSION=0.12.0-incubating
   PREDICTIONIO_DIST_URL="${PREDICTIONIO_DIST_URL:-https://dist.apache.org/repos/dist/release/incubator/predictionio/0.12.0-incubating/apache-predictionio-0.12.0-incubating-bin.tar.gz}"
+elif [[ $requires_pio_version =~ ^0\.14 ]]
+  then
+  PIO_VERSION=0.14.0
+  PIO_BUILD_SPARK_VERSION=2.1.3
+  PREDICTIONIO_DIST_URL="${PREDICTIONIO_DIST_URL:-https://dist.apache.org/repos/dist/release/predictionio/0.14.0/apache-predictionio-0.14.0-bin.tar.gz}"
 else
   echo "The PredictionIO version specified in template.json ($requires_pio_version) is not compatible." | indent
   exit 1
 fi
 
 PIO_BUILD=PredictionIO-${PIO_VERSION}
-SPARK_VERSION="spark-${PIO_BUILD_SPARK_VERSION:-2.1.1}-bin-hadoop${PIO_BUILD_HADOOP_VERSION:-2.7}"
+SPARK_VERSION="spark-${PIO_BUILD_SPARK_VERSION:-2.1.3}-bin-hadoop${PIO_BUILD_HADOOP_VERSION:-2.7}"
 
 # PredictionIO dist tarball URL, expects `.tar.gz` 
-default_url="https://marsikai.s3.amazonaws.com/${PIO_BUILD}.tar.gz"
+# default_url="https://marsikai.s3.amazonaws.com/${PIO_BUILD}.tar.gz"
 url="${PREDICTIONIO_DIST_URL-$default_url}"
+echo "-------> url $url"
 
 # The PATH set in .profile.d/pio-env.sh must match.
 export PIO_DIST_NAME="PredictionIO-dist"
@@ -95,7 +105,7 @@ rm "${PIO_DIST_NAME}.tar.gz"
 
 echo "+ Spark (${SPARK_VERSION})" | indent
 SPARK_HOME_DIR="$PIO_DIST_DIR/vendors/spark-hadoop"
-curl -s -L "https://marsikai.s3.amazonaws.com/${SPARK_VERSION}.tar.gz" > "spark-hadoop.tar.gz"
+curl -s -L "https://archive.apache.org/dist/spark/spark-2.1.3/spark-2.1.3-bin-hadoop2.7.tgz" > "spark-hadoop.tar.gz"
 mkdir -p "$SPARK_HOME_DIR"
 tar -xz -f "spark-hadoop.tar.gz" -C "$SPARK_HOME_DIR" --strip-components=1  | indent
 rm "spark-hadoop.tar.gz"
@@ -155,6 +165,8 @@ if [ -d "$BP_DIR/repo" ]
   echo "+ local Maven repo from buildpack (contents)" | indent
   cp -r $BP_DIR/repo $BUILD_DIR/
 fi
+
+echo "$BUILD_DIR"
 
 topic "Configure PredictionIO"
 default_pio_env="$BP_DIR/config/pio-env.sh"
